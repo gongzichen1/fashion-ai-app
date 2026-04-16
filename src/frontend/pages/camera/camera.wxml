@@ -1,0 +1,71 @@
+<!--pages/camera/camera.wxml - 拍照页模板-->
+<view class="camera-page">
+  <!-- 相机预览区域 -->
+  <view class="camera-container">
+    <camera
+      class="camera"
+      device-position="{{devicePosition}}"
+      flash="{{flash}}"
+      binderror="onError"
+    >
+      <!-- 拍摄引导 -->
+      <cover-view class="guide-overlay" wx:if="{{showGuide && !previewImage}}">
+        <cover-view class="guide-frame">
+          <cover-view class="corner corner-tl"></cover-view>
+          <cover-view class="corner corner-tr"></cover-view>
+          <cover-view class="corner corner-bl"></cover-view>
+          <cover-view class="corner corner-br"></cover-view>
+        </cover-view>
+        <cover-view class="guide-text">请将服装放置在框内</cover-view>
+      </cover-view>
+
+      <!-- 图片预览 -->
+      <cover-view class="preview-container" wx:if="{{previewImage}}">
+        <cover-image class="preview-image" src="{{previewImage}}"></cover-image>
+      </cover-view>
+    </camera>
+  </view>
+
+  <!-- 控制按钮区域 -->
+  <view class="controls">
+    <!-- 顶部工具栏 -->
+    <view class="top-bar" wx:if="{{!previewImage}}">
+      <view class="tool-btn" bindtap="switchCamera">
+        <image class="tool-icon" src="/images/icon-switch.png"></image>
+        <text class="tool-text">翻转</text>
+      </view>
+      <view class="tool-btn" bindtap="toggleFlash">
+        <image class="tool-icon" src="/images/icon-flash.png"></image>
+        <text class="tool-text">闪光灯</text>
+      </view>
+    </view>
+
+    <!-- 预览时的操作按钮 -->
+    <view class="preview-actions" wx:if="{{previewImage}}">
+      <button class="action-btn retake-btn" bindtap="retake">重新拍摄</button>
+      <button class="action-btn confirm-btn" bindtap="confirmAndAnalyze" loading="{{analyzing}}">
+        {{analyzing ? '分析中...' : '开始分析'}}
+      </button>
+    </view>
+
+    <!-- 拍摄按钮 -->
+    <view class="bottom-bar" wx:if="{{!previewImage}}">
+      <view class="album-btn" bindtap="chooseFromAlbum">
+        <image class="album-icon" src="/images/icon-album.png"></image>
+      </view>
+      <view class="shutter-btn" bindtap="takePhoto">
+        <view class="shutter-inner"></view>
+      </view>
+      <view class="placeholder"></view>
+    </view>
+  </view>
+
+  <!-- 分析中遮罩 -->
+  <view class="analyzing-mask" wx:if="{{analyzing}}">
+    <view class="analyzing-content">
+      <view class="loading-spinner"></view>
+      <text class="analyzing-text">AI正在分析您的服装...</text>
+      <text class="analyzing-tip">识别服装类型、颜色、风格</text>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>智能穿搭助手 - 产品需求文档</title>
+    <style>
+        body {
+            font-family: "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+            line-height: 1.8;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 15px;
+            font-size: 28px;
+        }
+        h2 {
+            color: #2980b9;
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+            margin-top: 30px;
+            font-size: 20px;
+        }
+        h3 {
+            color: #34495e;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .priority-p0 {
+            background-color: #e74c3c;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .priority-p1 {
+            background-color: #f39c12;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .priority-p2 {
+            background-color: #27ae60;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 13px;
+            border: 1px solid #e9ecef;
+        }
+        code {
+            background-color: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 13px;
+        }
+        .highlight-red {
+            background-color: #ffebee;
+            border-left: 4px solid #e74c3c;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .highlight-yellow {
+            background-color: #fff8e1;
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .highlight-green {
+            background-color: #e8f5e9;
+            border-left: 4px solid #27ae60;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .info-box {
+            background-color: #e3f2fd;
+            border: 1px solid #90caf9;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        ul, ol {
+            padding-left: 25px;
+        }
+        li {
+            margin: 8px 0;
+        }
+        .page-break {
+            page-break-after: always;
+        }
+    </style>
+</head>
+<body>
+
+<h1>智能穿搭助手 - 产品需求文档 (PRD)</h1>
+
+<h2>一、产品概述</h2>
+
+<h3>1.1 产品名称</h3>
+<p><strong>智搭</strong> - 智能服装搭配推荐助手</p>
+
+<h3>1.2 产品定位</h3>
+<p>基于AI视觉识别与推荐算法的服装搭配小程序，帮助用户快速获取专业的穿搭建议。</p>
+
+<h3>1.3 核心价值</h3>
+<ul>
+    <li><strong>拍照即配</strong>：无需手动输入，拍照即可获得搭配建议</li>
+    <li><strong>AI驱动</strong>：利用GLM-5大模型提供专业的时尚搭配建议</li>
+    <li><strong>个性化推荐</strong>：根据用户偏好、场景、季节智能推荐</li>
+</ul>
+
+<h2>二、目标用户</h2>
+
+<table>
+    <tr>
+        <th>用户类型</th>
+        <th>特征描述</th>
+        <th>核心需求</th>
+    </tr>
+    <tr>
+        <td>时尚新手</td>
+        <td>对穿搭缺乏经验，不知如何搭配</td>
+        <td>快速获得专业搭配建议</td>
+    </tr>
+    <tr>
+        <td>职场白领</td>
+        <td>时间紧张，需要高效穿搭方案</td>
+        <td>场景化穿搭推荐</td>
+    </tr>
+    <tr>
+        <td>购物决策者</td>
+        <td>在商场/网购时犹豫不决</td>
+        <td>即时搭配参考</td>
+    </tr>
+    <tr>
+        <td>服装爱好者</td>
+        <td>喜欢尝试不同风格</td>
+        <td>新鲜搭配灵感</td>
+    </tr>
+</table>
+
+<h2>三、核心功能模块</h2>
+
+<h3>3.1 功能架构图</h3>
+
+<pre>
++---------------------------------------------------+
+|                   智搭小程序                       |
++---------------------------------------------------+
+|  首页    |   拍照识别   |   搭配推荐   |   我的    |
++---------------------------------------------------+
+|                  核心功能模块                      |
++----------+----------+----------+-----------------+
+| 相机拍摄  | AI识别    | 搭配推荐  | 用户中心        |
+| 图片上传  | 特征提取  | 商品链接  | 收藏管理        |
+| 历史记录  | 风格分析  | 分享保存  | 偏好设置        |
++----------+----------+----------+-----------------+
+</pre>
+
+<h3>3.2 详细功能说明</h3>
+
+<h4>模块一：拍照识别</h4>
+
+<table>
+    <tr>
+        <th>功能点</th>
+        <th>描述</th>
+        <th>优先级</th>
+    </tr>
+    <tr>
+        <td>相机拍摄</td>
+        <td>调用手机相机实时拍摄裙子</td>
+        <td><span class="priority-p0">P0</span></td>
+    </tr>
+    <tr>
+        <td>相册上传</td>
+        <td>从相册选择已有图片</td>
+        <td><span class="priority-p0">P0</span></td>
+    </tr>
+    <tr>
+        <td>图片裁剪</td>
+        <td>支持裁剪聚焦服装区域</td>
+        <td><span class="priority-p1">P1</span></td>
+    </tr>
+    <tr>
+        <td>多角度拍摄</td>
+        <td>支持拍摄多张图片综合分析</td>
+        <td><span class="priority-p2">P2</span></td>
+    </tr>
+    <tr>
+        <td>拍摄引导</td>
+        <td>提示用户最佳拍摄角度和光线</td>
+        <td><span class="priority-p1">P1</span></td>
+    </tr>
+</table>
+
+<h4>模块二：AI分析识别</h4>
+
+<table>
+    <tr>
+        <th>功能点</th>
+        <th>描述</th>
+        <th>优先级</th>
+    </tr>
+    <tr>
+        <td>服装识别</td>
+        <td>识别服装类型（裙子、上衣、裤子等）</td>
+        <td><span class="priority-p0">P0</span></td>
+    </tr>
+    <tr>
+        <td>颜色提取</td>
+        <td>提取主色调和辅助色</td>
+        <td><span class="priority-p0">P0</span></td>
+    </tr>
+    <tr>
+        <td>风格判断</td>
+        <td>判断服装风格（休闲/正式/优雅/运动等）</td>
+        <td><span class="priority-p0">P0</span></td>
+    </tr>
+    <tr>
+        <td>材质推测</td>
+        <td>推测面料材质</td>
+        <td><span class="priority-p1">P1</span></td>
+    </tr>
+    <tr>
+        <td>场景适配</td>
+        <td>分析适合的穿着场景</td>
+        <td><span class="priority-p1">P1</span></td>
+    </tr>
+    <tr>
+        <td>季节适配</td>
+        <td>分析适合的穿着季节</td>
+        <td><span class="priority-p1">P1</span></td>
+    </tr>
+</table>
+
+<h4>模块三：搭配推荐</h4>
+
+<table>
+    <tr>
+        <th>功能点</th>
+        <th>描述</th>
+        <th>优先级</th>
+    </tr>
+    <tr>
+        <td>上装推荐</td>
+        <td>推荐适合的上衣/外套搭配</td>
+        <td><span class="priority-p0">P0</span></td>
+    </tr>
+    <tr>
+        <td>鞋履推荐</td>
+        <td>推荐适合的鞋子搭配</td>
+        <td><span class="priority-p0">P0</span></td>
+    </tr>
+    <tr>
+        <td>配饰推荐</td>
+        <td>推荐包包、首饰、帽子等配饰</td>
+        <td><span class="priority-p0">P0</span></td>
+    </tr>
+    <tr>
+        <td>整体look</td>
+        <td>展示完整搭配效果（可合成预览）</td>
+        <td><span class="priority-p1">P1</span></td>
+    </tr>
+    <tr>
+        <td>场景推荐</td>
+        <td>按场景筛选推荐（约会/通勤/聚会等）</td>
+        <td><span class="priority-p1">P1</span></td>
+    </tr>
+    <tr>
+        <td>风格推荐</td>
+        <td>按风格筛选推荐</td>
+        <td><span class="priority-p1">P1</span></td>
+    </tr>
+    <tr>
+        <td>预算筛选</td>
+        <td>按价格区间筛选推荐商品</td>
+        <td><span class="priority-p2">P2</span></td>
+    </tr>
+    <tr>
+        <td>商品链接</td>
+        <td>提供推荐商品购买链接</td>
+        <td><span class="priority-p1">P1</span></td>
+    </tr>
+</table>
+
+<h4>模块四：用户中心</h4>
+
+<table>
+    <tr>
+        <th>功能点</th>
+        <th>描述</th>
+        <th>优先级</th>
+    </tr>
+    <tr>
+        <td>历史记录</td>
+        <td>查看历史拍摄和推荐记录</td>
+        <td><span class="priority-p1">P1</span></td>
+    </tr>
+    <tr>
+        <td>收藏夹</td>
+        <td>收藏喜欢的搭配方案</td>
+        <td><span class="priority-p1">P1</span></td>
+    </tr>
+    <tr>
+        <td>个人偏好</td>
+        <td>设置风格偏好、身材信息</td>
+        <td><span class="priority-p1">P1</span></td>
+    </tr>
+    <tr>
+        <td>分享功能</td>
+        <td>分享搭配方案到社交平台</td>
+        <td><span class="priority-p2">P2</span></td>
+    </tr>
+</table>
+
+<h2>四、用户使用流程</h2>
+
+<pre>
++-------------+     +-------------+     +-------------+
+|   打开小程序  | --> |  拍摄/上传   | --> |  AI识别分析  |
++-------------+     +-------------+     +-------------+
+                                               |
+                                               v
++-------------+     +-------------+     +-------------+
+|   分享/收藏   | <-- |  查看详情    | <-- |  搭配推荐    |
++-------------+     +-------------+     +-------------+
+                           |
+                           v
+                    +-------------+
+                    |  购买链接    |
+                    +-------------+
+</pre>
+
+<h2>五、技术架构</h2>
+
+<h3>5.1 前端技术栈</h3>
+
+<pre>
+微信小程序 / Uni-app
+├── UI框架：Vant Weapp / uView
+├── 状态管理：原生/ Vuex
+├── 相机API：wx.createCameraContext()
+└── 图片处理：Canvas API
+</pre>
+
+<h3>5.2 后端技术栈</h3>
+
+<pre>
+├── 后端框架：Node.js / Python Flask
+├── AI服务：GLM-5 API（智谱AI）
+├── 图像识别：GLM-4V（视觉模型）
+├── 数据库：MySQL / MongoDB
+├── 缓存：Redis
+└── 云存储：OSS / COS
+</pre>
+
+<h3>5.3 核心接口设计</h3>
+
+<pre>
+POST /api/analyze
+├── 入参：图片base64 / 图片URL
+├── 出参：服装特征JSON（类型、颜色、风格、场景等）
+
+POST /api/recommend
+├── 入参：服装特征 + 用户偏好 + 筛选条件
+├── 出参：推荐搭配列表（商品图、描述、链接）
+
+GET /api/user/history
+├── 入参：用户ID
+├── 出参：历史记录列表
+</pre>
+
+<h2>六、数据结构设计</h2>
+
+<h3>6.1 服装特征数据结构</h3>
+
+<pre>
+{
+  "garment_id": "unique_id",
+  "type": "dress",
+  "category": "skirt",
+  "colors": {
+    "primary": "#FF6B6B",
+    "secondary": ["#FFFFFF", "#2D3436"]
+  },
+  "style": ["elegant", "casual"],
+  "material": "cotton",
+  "length": "midi",
+  "pattern": "solid",
+  "suitable_scenes": ["date", "office", "party"],
+  "suitable_seasons": ["spring", "summer"],
+  "confidence_score": 0.92
+}
+</pre>
+
+<h3>6.2 搭配推荐数据结构</h3>
+
+<pre>
+{
+  "recommendation_id": "rec_001",
+  "garment_id": "unique_id",
+  "matches": [
+    {
+      "type": "top",
+      "name": "白色简约衬衫",
+      "image_url": "https://...",
+      "reason": "白衬衫与红色半裙的经典搭配...",
+      "product_url": "https://item.jd.com/...",
+      "price_range": "100-200元",
+      "tags": ["通勤", "简约"]
+    }
+  ],
+  "overall_style": "知性优雅风",
+  "style_tips": "适合搭配简约款手提包..."
+}
+</pre>
+
+<h2>七、MVP版本范围</h2>
+
+<h3>7.1 第一阶段（Demo版本）</h3>
+
+<p><strong>目标</strong>：验证核心流程可行性</p>
+
+<table>
+    <tr>
+        <th>功能</th>
+        <th>状态</th>
+    </tr>
+    <tr>
+        <td>拍照/上传图片</td>
+        <td>包含</td>
+    </tr>
+    <tr>
+        <td>AI识别裙子基本信息</td>
+        <td>包含</td>
+    </tr>
+    <tr>
+        <td>基础搭配推荐（文字描述）</td>
+        <td>包含</td>
+    </tr>
+    <tr>
+        <td>简单的推荐图片展示</td>
+        <td>包含</td>
+    </tr>
+</table>
+
+<h3>7.2 第二阶段（完善版本）</h3>
+<ul>
+    <li>完整的AI特征分析</li>
+    <li>商品链接接入</li>
+    <li>用户偏好设置</li>
+    <li>历史记录管理</li>
+</ul>
+
+<h3>7.3 第三阶段（商业化版本）</h3>
+<ul>
+    <li>电商联盟接入</li>
+    <li>会员体系</li>
+    <li>社区分享功能</li>
+</ul>
+
+<h2>八、需要细化和完善的功能点</h2>
+
+<div class="highlight-red">
+<h3>高优先级 - 必须细化</h3>
+
+<table>
+    <tr>
+        <th>功能点</th>
+        <th>问题</th>
+        <th>需要明确的内容</th>
+    </tr>
+    <tr>
+        <td><strong>AI识别准确率</strong></td>
+        <td>如何保证识别准确？</td>
+        <td>1. 是否需要模型微调？<br>2. 识别失败时的降级方案？<br>3. 用户反馈纠错机制？</td>
+    </tr>
+    <tr>
+        <td><strong>推荐数据来源</strong></td>
+        <td>推荐商品从哪里来？</td>
+        <td>1. 自建商品库？<br>2. 接入电商API（淘宝/京东/小红书）？<br>3. 人工编辑推荐？</td>
+    </tr>
+    <tr>
+        <td><strong>搭配规则库</strong></td>
+        <td>AI推荐依据是什么？</td>
+        <td>1. 需要搭建搭配知识库吗？<br>2. 是否需要时尚顾问参与规则制定？<br>3. 如何处理冲突的搭配规则？</td>
+    </tr>
+    <tr>
+        <td><strong>用户偏好获取</strong></td>
+        <td>首次使用如何推荐？</td>
+        <td>1. 引导用户填写风格问卷？<br>2. 通过历史行为学习？<br>3. 冷启动策略？</td>
+    </tr>
+</table>
+</div>
+
+<div class="highlight-yellow">
+<h3>中优先级 - 建议细化</h3>
+
+<table>
+    <tr>
+        <th>功能点</th>
+        <th>问题</th>
+        <th>需要明确的内容</th>
+    </tr>
+    <tr>
+        <td><strong>推荐算法</strong></td>
+        <td>如何做个性化推荐？</td>
+        <td>1. 基于规则还是协同过滤？<br>2. 是否需要用户画像？<br>3. 多久更新一次推荐结果？</td>
+    </tr>
+    <tr>
+        <td><strong>虚拟试穿</strong></td>
+        <td>是否支持预览效果？</td>
+        <td>1. 技术可行性评估？<br>2. 2D合成还是3D虚拟？<br>3. 是否作为付费功能？</td>
+    </tr>
+    <tr>
+        <td><strong>商业模式</strong></td>
+        <td>如何变现？</td>
+        <td>1. 电商佣金分成？<br>2. 会员订阅？<br>3. 广告收入？</td>
+    </tr>
+    <tr>
+        <td><strong>数据安全</strong></td>
+        <td>用户隐私如何保护？</td>
+        <td>1. 图片存储策略？<br>2. 是否需要隐私协议？<br>3. 用户数据删除权利？</td>
+    </tr>
+</table>
+</div>
+
+<div class="highlight-green">
+<h3>低优先级 - 后续迭代</h3>
+
+<table>
+    <tr>
+        <th>功能点</th>
+        <th>问题</th>
+        <th>需要明确的内容</th>
+    </tr>
+    <tr>
+        <td><strong>社交功能</strong></td>
+        <td>社区功能如何设计？</td>
+        <td>1. UGC内容审核？<br>2. 互动机制？<br>3. 达人体系？</td>
+    </tr>
+    <tr>
+        <td><strong>多语言支持</strong></td>
+        <td>是否支持海外市场？</td>
+        <td>1. 需要哪些语言？<br>2. 本地化穿搭规则？</td>
+    </tr>
+    <tr>
+        <td><strong>AR功能</strong></td>
+        <td>是否加入AR试穿？</td>
+        <td>1. 技术选型？<br>2. 硬件要求？</td>
+    </tr>
+</table>
+</div>
+
+<h2>九、开发排期建议</h2>
+
+<pre>
+第1-2周：技术调研与架构设计
+├── GLM-5 API接入测试
+├── 小程序框架搭建
+└── 数据库设计
+
+第3-4周：核心功能开发
+├── 拍照上传模块
+├── AI识别模块
+└── 推荐展示模块
+
+第5周：联调测试
+├── 前后端联调
+├── 用户测试
+└── Bug修复
+
+第6周：优化上线
+├── 性能优化
+├── UI完善
+└── 小程序提审
+</pre>
+
+<h2>十、成功指标</h2>
+
+<table>
+    <tr>
+        <th>指标</th>
+        <th>目标值</th>
+    </tr>
+    <tr>
+        <td>识别准确率</td>
+        <td>≥ 85%</td>
+    </tr>
+    <tr>
+        <td>推荐点击率</td>
+        <td>≥ 30%</td>
+    </tr>
+    <tr>
+        <td>用户留存率（次日）</td>
+        <td>≥ 20%</td>
+    </tr>
+    <tr>
+        <td>平均使用时长</td>
+        <td>≥ 3分钟</td>
+    </tr>
+</table>
+
+<h2>下一步行动</h2>
+
+<div class="info-box">
+<ol>
+    <li><strong>确认技术方案</strong>：选择小程序框架（原生/Uni-app）</li>
+    <li><strong>申请API密钥</strong>：注册智谱AI账号获取GLM-5 API</li>
+    <li><strong>准备商品数据</strong>：确定推荐商品来源</li>
+    <li><strong>设计UI原型</strong>：完成界面设计稿</li>
+    <li><strong>开始Demo开发</strong>：基于本文档进行MVP开发</li>
+</ol>
+</div>
+
+<hr>
+<p style="text-align: center; color: #999; font-size: 12px;">
+    文档版本：v1.0 | 创建日期：2026年4月16日
+</p>
+
+</body>
+</html>

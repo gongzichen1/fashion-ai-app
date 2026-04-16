@@ -1,0 +1,4 @@
+<!-- 保存图标 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <path fill="#666" d="M6 4h16l4 4v20H6V4zm3 3v4h10V7H9zm7 8a5 5 0 100 10 5 5 0 000-10z"/>
+</svg>

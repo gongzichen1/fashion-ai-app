@@ -1,0 +1,8 @@
+<!-- 空状态图标 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <circle cx="100" cy="100" r="80" fill="#F5F5F5"/>
+  <rect x="60" y="70" width="80" height="60" rx="5" fill="#E0E0E0"/>
+  <circle cx="80" cy="90" r="10" fill="#BDBDBD"/>
+  <path d="M60 120l30-20 20 15 30-25v30H60z" fill="#BDBDBD"/>
+  <text x="100" y="170" text-anchor="middle" fill="#999" font-size="14">暂无内容</text>
+</svg>

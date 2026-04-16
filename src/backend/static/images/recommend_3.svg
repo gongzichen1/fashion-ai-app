@@ -1,0 +1,8 @@
+<!-- 推荐占位图3 - 包包 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <rect width="400" height="400" fill="#FFF5F7"/>
+  <rect x="100" y="120" width="200" height="180" rx="20" fill="#FF6B9D"/>
+  <path d="M150 120c0-30 20-50 50-50s50 20 50 50" fill="none" stroke="#FF8FB1" stroke-width="10"/>
+  <rect x="180" y="180" width="40" height="60" rx="5" fill="#FFB6C1"/>
+  <text x="200" y="350" text-anchor="middle" fill="#666" font-size="16">包包示例</text>
+</svg>

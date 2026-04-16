@@ -1,0 +1,8 @@
+<!-- 推荐占位图1 - 上衣 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <rect width="400" height="400" fill="#FFF5F7"/>
+  <path d="M120 80h160l40 60v200H80V140l40-60z" fill="#FF6B9D"/>
+  <ellipse cx="200" cy="80" rx="30" ry="15" fill="#FF8FB1"/>
+  <path d="M160 140h80v100h-80z" fill="white" opacity="0.3"/>
+  <text x="200" y="350" text-anchor="middle" fill="#666" font-size="16">上衣示例</text>
+</svg>

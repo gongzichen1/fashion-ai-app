@@ -1,0 +1,6 @@
+<!-- 默认头像 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <circle cx="60" cy="60" r="58" fill="#FFE4EC"/>
+  <circle cx="60" cy="45" r="20" fill="#FFB6C1"/>
+  <path d="M30 95c0-16.6 13.4-30 30-30s30 13.4 30 30" fill="#FFB6C1"/>
+</svg>

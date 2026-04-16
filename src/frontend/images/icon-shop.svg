@@ -1,0 +1,6 @@
+<!-- 购物图标 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <path fill="#FF6B9D" d="M6 6h3l4 14h11l3-10H11"/>
+  <circle cx="12" cy="26" r="2" fill="#FF6B9D"/>
+  <circle cx="22" cy="26" r="2" fill="#FF6B9D"/>
+</svg>

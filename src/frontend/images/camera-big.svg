@@ -1,0 +1,15 @@
+<!-- 大相机图标 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="cameraGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B9D"/>
+      <stop offset="100%" style="stop-color:#FF8FB1"/>
+    </linearGradient>
+  </defs>
+  <rect x="15" y="35" width="90" height="70" rx="10" fill="url(#cameraGrad)"/>
+  <circle cx="60" cy="70" r="25" fill="white"/>
+  <circle cx="60" cy="70" r="18" fill="url(#cameraGrad)"/>
+  <circle cx="60" cy="70" r="8" fill="white"/>
+  <rect x="75" y="25" width="30" height="15" rx="5" fill="url(#cameraGrad)"/>
+  <circle cx="90" cy="50" r="5" fill="white"/>
+</svg>

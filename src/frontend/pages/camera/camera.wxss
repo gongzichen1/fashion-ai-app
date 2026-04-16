@@ -1,0 +1,260 @@
+/* pages/camera/camera.wxss - 拍照页样式 */
+
+.camera-page {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #000;
+}
+
+/* 相机容器 */
+.camera-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.camera {
+  width: 100%;
+  height: 100%;
+}
+
+/* 拍摄引导 */
+.guide-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.guide-frame {
+  width: 500rpx;
+  height: 600rpx;
+  position: relative;
+}
+
+.corner {
+  position: absolute;
+  width: 60rpx;
+  height: 60rpx;
+  border-color: #FF6B9D;
+  border-style: solid;
+}
+
+.corner-tl {
+  top: 0;
+  left: 0;
+  border-width: 6rpx 0 0 6rpx;
+}
+
+.corner-tr {
+  top: 0;
+  right: 0;
+  border-width: 6rpx 6rpx 0 0;
+}
+
+.corner-bl {
+  bottom: 0;
+  left: 0;
+  border-width: 0 0 6rpx 6rpx;
+}
+
+.corner-br {
+  bottom: 0;
+  right: 0;
+  border-width: 0 6rpx 6rpx 0;
+}
+
+.guide-text {
+  color: #FFFFFF;
+  font-size: 28rpx;
+  margin-top: 30rpx;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 10rpx 30rpx;
+  border-radius: 30rpx;
+}
+
+/* 图片预览 */
+.preview-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #000;
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+}
+
+/* 控制区域 */
+.controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* 顶部工具栏 */
+.top-bar {
+  position: absolute;
+  top: 40rpx;
+  right: 30rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.tool-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 30rpx;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 20rpx;
+  border-radius: 50%;
+}
+
+.tool-icon {
+  width: 50rpx;
+  height: 50rpx;
+}
+
+.tool-text {
+  font-size: 20rpx;
+  color: #FFFFFF;
+  margin-top: 5rpx;
+}
+
+/* 预览操作按钮 */
+.preview-actions {
+  display: flex;
+  justify-content: space-around;
+  padding: 40rpx 30rpx;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+}
+
+.action-btn {
+  flex: 1;
+  margin: 0 20rpx;
+  padding: 25rpx 0;
+  border-radius: 50rpx;
+  font-size: 30rpx;
+  font-weight: 500;
+}
+
+.retake-btn {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+  border: 2rpx solid #FFFFFF;
+}
+
+.confirm-btn {
+  background: linear-gradient(135deg, #FF6B9D 0%, #FF8FB1 100%);
+  color: #FFFFFF;
+  border: none;
+}
+
+/* 底部操作栏 */
+.bottom-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 40rpx 30rpx;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+}
+
+.album-btn {
+  width: 80rpx;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.album-icon {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 10rpx;
+  border: 2rpx solid #FFFFFF;
+}
+
+.shutter-btn {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 50%;
+  background-color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shutter-inner {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FF6B9D 0%, #FF8FB1 100%);
+  border: 4rpx solid #FFFFFF;
+}
+
+.placeholder {
+  width: 80rpx;
+}
+
+/* 分析中遮罩 */
+.analyzing-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.analyzing-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.loading-spinner {
+  width: 100rpx;
+  height: 100rpx;
+  border: 6rpx solid #FFE4EC;
+  border-top-color: #FF6B9D;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.analyzing-text {
+  font-size: 32rpx;
+  color: #FFFFFF;
+  margin-top: 30rpx;
+}
+
+.analyzing-tip {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 15rpx;
+}

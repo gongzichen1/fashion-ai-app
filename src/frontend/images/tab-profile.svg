@@ -1,0 +1,5 @@
+<!-- 我的图标 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <circle cx="24" cy="14" r="10" fill="none" stroke="#999" stroke-width="3"/>
+  <path fill="none" stroke="#999" stroke-width="3" d="M6 44c0-10 8-16 18-16s18 6 18 16"/>
+</svg>

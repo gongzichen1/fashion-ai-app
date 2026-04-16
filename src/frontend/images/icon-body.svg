@@ -1,0 +1,5 @@
+<!-- 身材图标 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <circle cx="16" cy="6" r="4" fill="#FF6B9D"/>
+  <path d="M12 12h8v8l-2 10h-4l-2-10v-8z" fill="#FF6B9D"/>
+</svg>
