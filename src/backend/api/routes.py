@@ -6,7 +6,7 @@ import time
 from datetime import datetime
 from flask import Blueprint, request, jsonify, current_app
 
-from services import AIService, ImageService
+from services import AIService, ImageService, StitchService
 from config import Config
 
 # 创建蓝图
@@ -225,3 +225,304 @@ def _format_recommendations(recommendations: list) -> list:
         })
 
     return formatted
+
+
+# ===== Stitch MCP API 路由 =====
+
+@api_bp.route("/stitch/projects", methods=["GET"])
+def get_stitch_projects():
+    """
+    获取Stitch项目列表
+    """
+    try:
+        stitch_service = StitchService()
+        projects = stitch_service.list_projects()
+
+        return jsonify({
+            "success": True,
+            "data": projects
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@api_bp.route("/stitch/projects/<project_id>", methods=["GET"])
+def get_stitch_project(project_id: str):
+    """
+    获取特定Stitch项目信息
+
+    Args:
+        project_id: 项目ID
+    """
+    try:
+        stitch_service = StitchService()
+        project = stitch_service.get_project(project_id)
+
+        return jsonify({
+            "success": True,
+            "data": project
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@api_bp.route("/stitch/projects/<project_id>/designs", methods=["GET"])
+def get_stitch_designs(project_id: str):
+    """
+    获取Stitch项目中的所有设计
+
+    Args:
+        project_id: 项目ID
+    """
+    try:
+        stitch_service = StitchService()
+        designs = stitch_service.list_designs(project_id)
+
+        return jsonify({
+            "success": True,
+            "data": designs
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@api_bp.route("/stitch/projects/<project_id>/designs/<design_id>", methods=["GET"])
+def get_stitch_design(project_id: str, design_id: str):
+    """
+    获取特定Stitch设计信息
+
+    Args:
+        project_id: 项目ID
+        design_id: 设计ID
+    """
+    try:
+        stitch_service = StitchService()
+        design = stitch_service.get_design(project_id, design_id)
+
+        return jsonify({
+            "success": True,
+            "data": design
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@api_bp.route("/stitch/projects/<project_id>/designs/<design_id>/components", methods=["GET"])
+def get_stitch_design_components(project_id: str, design_id: str):
+    """
+    获取Stitch设计中的所有组件
+
+    Args:
+        project_id: 项目ID
+        design_id: 设计ID
+    """
+    try:
+        stitch_service = StitchService()
+        components = stitch_service.get_design_components(project_id, design_id)
+
+        return jsonify({
+            "success": True,
+            "data": components
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@api_bp.route("/stitch/projects/<project_id>/designs/<design_id>/analyze", methods=["POST"])
+def analyze_stitch_design(project_id: str, design_id: str):
+    """
+    分析Stitch设计组件
+
+    Request Body:
+    {
+        "component_ids": ["component_id_1", "component_id_2"]
+    }
+    """
+    try:
+        data = request.get_json()
+        component_ids = data.get("component_ids", [])
+
+        if not component_ids:
+            return jsonify({"success": False, "message": "请提供要分析的组件ID"}), 400
+
+        stitch_service = StitchService()
+        results = stitch_service.analyze_design_components(project_id, design_id, component_ids)
+
+        return jsonify({
+            "success": True,
+            "data": results
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@api_bp.route("/stitch/projects/<project_id>/designs/<design_id>/export/<component_id>", methods=["GET"])
+def export_stitch_component(project_id: str, design_id: str, component_id: str):
+    """
+    导出Stitch组件为图片
+
+    Query Parameters:
+    - format: PNG/SVG/JPG (default: PNG)
+    - scale: 0.1-4.0 (default: 1.0)
+    """
+    try:
+        format_param = request.args.get("format", "PNG")
+        scale_param = float(request.args.get("scale", 1.0))
+
+        stitch_service = StitchService()
+        image_data = stitch_service.export_component(
+            project_id, design_id, component_id, format_param, scale_param
+        )
+
+        if image_data:
+            from flask import send_file
+            from io import BytesIO
+
+            # 根据格式设置MIME类型
+            mime_types = {
+                "PNG": "image/png",
+                "JPG": "image/jpeg",
+                "SVG": "image/svg+xml"
+            }
+
+            mime_type = mime_types.get(format_param.upper(), "image/png")
+
+            return send_file(
+                BytesIO(image_data),
+                mimetype=mime_type,
+                as_attachment=True,
+                download_name=f"stitch_component_{component_id}.{format_param.lower()}"
+            )
+        else:
+            return jsonify({"success": False, "message": "导出失败"}), 404
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@api_bp.route("/stitch/projects/<project_id>/designs/<design_id>/export", methods=["GET"])
+def export_stitch_design(project_id: str, design_id: str):
+    """
+    导出整个Stitch设计为图片
+
+    Query Parameters:
+    - format: PNG/SVG/JPG (default: PNG)
+    - scale: 0.1-4.0 (default: 1.0)
+    """
+    try:
+        format_param = request.args.get("format", "PNG")
+        scale_param = float(request.args.get("scale", 1.0))
+
+        stitch_service = StitchService()
+        image_data = stitch_service.export_design(
+            project_id, design_id, format_param, scale_param
+        )
+
+        if image_data:
+            from flask import send_file
+            from io import BytesIO
+
+            mime_types = {
+                "PNG": "image/png",
+                "JPG": "image/jpeg",
+                "SVG": "image/svg+xml"
+            }
+
+            mime_type = mime_types.get(format_param.upper(), "image/png")
+
+            return send_file(
+                BytesIO(image_data),
+                mimetype=mime_type,
+                as_attachment=True,
+                download_name=f"stitch_design_{design_id}.{format_param.lower()}"
+            )
+        else:
+            return jsonify({"success": False, "message": "导出失败"}), 404
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@api_bp.route("/stitch/projects/<project_id>/designs", methods=["POST"])
+def create_stitch_design(project_id: str):
+    """
+    从图片创建设计
+
+    Request Body:
+    {
+        "image": "base64_encoded_image",
+        "name": "设计名称"
+    }
+    """
+    try:
+        data = request.get_json()
+        image_base64 = data.get("image")
+        design_name = data.get("name", "新设计")
+
+        if not image_base64:
+            return jsonify({"success": False, "message": "请提供图片数据"}), 400
+
+        # 解码base64图片
+        import base64
+        image_data = base64.b64decode(image_base64)
+
+        stitch_service = StitchService()
+        result = stitch_service.create_design_from_image(project_id, image_data, design_name)
+
+        return jsonify({
+            "success": True,
+            "data": result
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@api_bp.route("/stitch/projects/<project_id>/designs/<design_id>/variations", methods=["GET"])
+def get_stitch_design_variations(project_id: str, design_id: str):
+    """
+    获取设计的变体版本
+
+    Args:
+        project_id: 项目ID
+        design_id: 设计ID
+    """
+    try:
+        stitch_service = StitchService()
+        variations = stitch_service.get_design_variations(project_id, design_id)
+
+        return jsonify({
+            "success": True,
+            "data": variations
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@api_bp.route("/stitch/projects/<project_id>/screens/<screen_id>/assets", methods=["GET"])
+def download_stitch_screen_assets(project_id: str, screen_id: str):
+    """
+    下载Stitch屏幕资产
+
+    Args:
+        project_id: 项目ID
+        screen_id: 屏幕ID
+    """
+    try:
+        stitch_service = StitchService()
+        assets = stitch_service.download_screen_assets(project_id, screen_id)
+
+        return jsonify({
+            "success": True,
+            "data": assets
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
