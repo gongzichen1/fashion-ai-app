@@ -25,28 +25,25 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        key: ${{ runner.os }}-pip-${{ hashFiles('src/backend/requirements.txt', 'requirements-dev.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
 
     - name: Install dependencies
       run: |
-        cd src/backend
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install -r src/backend/requirements.txt -r requirements-dev.txt
 
     - name: Run tests
       run: |
-        cd src/backend
-        python -m pytest tests/ -v --tb=short --cov=.
+        python -m pytest tests/ -v --tb=short --cov=src/backend
 
     - name: Code quality checks
       run: |
-        cd src/backend
         pip install flake8 black isort
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        black --check --diff .
-        isort --check-only --diff .
+        flake8 src/backend tests --count --select=E9,F63,F7,F82 --show-source --statistics
+        black --check --diff src/backend tests
+        isort --check-only --diff src/backend tests
 
   build:
     runs-on: ubuntu-latest
