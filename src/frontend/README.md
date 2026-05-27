@@ -18,13 +18,11 @@
 
 ### 修改API地址
 
-编辑 `app.js`，修改 `apiBaseUrl`：
+编辑 `config/index.js`，修改 `API_BASE_URL`：
 
 ```javascript
-globalData: {
-  apiBaseUrl: 'http://localhost:5000/api',  // 开发环境
-  // apiBaseUrl: 'https://your-domain.com/api',  // 生产环境
-}
+const API_BASE_URL = 'http://localhost:5001/api'; // 开发环境
+// const API_BASE_URL = 'https://your-domain.com/api'; // 生产环境
 ```
 
 ### 修改主题色
@@ -46,6 +44,10 @@ page {
 | 拍照 | pages/camera | 拍摄/上传服装图片 |
 | 结果 | pages/result | 查看分析结果和推荐 |
 | 我的 | pages/profile | 个人中心和设置 |
+| 风格偏好 | pages/preference | 设置穿搭偏好 |
+| 身材信息 | pages/bodyinfo | 保存身高体重和身材类型 |
+| 意见反馈 | pages/feedback | 提交本地反馈 |
+| 关于我们 | pages/about | 应用说明 |
 
 ## 开发说明
 
@@ -64,5 +66,5 @@ page {
 ## 注意事项
 
 - 开发时请在开发者工具中勾选「不校验合法域名」
-- 生产环境需要配置服务器域名
-- 图片资源需要自行添加到 `images/` 目录
+- 生产环境需要配置 HTTPS 服务器域名，并在微信后台加入 request/uploadFile 合法域名
+- 当前图片资源已放在 `images/` 目录

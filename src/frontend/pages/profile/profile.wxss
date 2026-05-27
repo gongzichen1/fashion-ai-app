@@ -194,6 +194,43 @@
   color: #999;
 }
 
+.wardrobe-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+}
+
+.wardrobe-item {
+  min-width: 0;
+  background-color: #F8F8F8;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.wardrobe-image {
+  width: 100%;
+  height: 220rpx;
+  display: block;
+  background-color: #F0F0F0;
+}
+
+.wardrobe-name {
+  display: block;
+  padding: 16rpx 16rpx 6rpx;
+  font-size: 26rpx;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wardrobe-type {
+  display: block;
+  padding: 0 16rpx 16rpx;
+  font-size: 22rpx;
+  color: #999;
+}
+
 .delete-icon {
   width: 36rpx;
   height: 36rpx;

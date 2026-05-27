@@ -69,6 +69,68 @@
   color: #999;
 }
 
+/* 天气穿搭 */
+.weather-card {
+  margin: 0 30rpx 30rpx;
+  padding: 28rpx;
+  border-radius: 20rpx;
+  background-color: #FFFFFF;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+
+.weather-main,
+.weather-placeholder {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24rpx;
+}
+
+.weather-info,
+.weather-advice {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.weather-info {
+  flex: 0 0 230rpx;
+}
+
+.weather-advice {
+  flex: 1;
+}
+
+.weather-title,
+.weather-advice-title {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 8rpx;
+}
+
+.weather-temp {
+  font-size: 48rpx;
+  font-weight: 600;
+  color: #FF6B9D;
+  margin-bottom: 6rpx;
+}
+
+.weather-desc,
+.weather-advice-text {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.5;
+}
+
+.weather-action {
+  flex-shrink: 0;
+  padding: 14rpx 24rpx;
+  border-radius: 30rpx;
+  background-color: #FFE4EC;
+  color: #FF6B9D;
+  font-size: 26rpx;
+}
+
 /* 区块样式 */
 .section {
   margin: 30rpx;

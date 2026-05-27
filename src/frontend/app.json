@@ -3,13 +3,22 @@
     "pages/index/index",
     "pages/camera/camera",
     "pages/result/result",
-    "pages/profile/profile"
+    "pages/profile/profile",
+    "pages/preference/preference",
+    "pages/bodyinfo/bodyinfo",
+    "pages/feedback/feedback",
+    "pages/about/about"
   ],
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#FF6B9D",
     "navigationBarTitleText": "智搭",
     "navigationBarTextStyle": "white"
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于获取当地天气并提供穿搭建议"
+    }
   },
   "tabBar": {
     "color": "#999999",

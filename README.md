@@ -1,13 +1,10 @@
 # 👗 穿搭AI小程序 - 基于Gemini的智能穿搭推荐系统
 
-[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Flask-3.0+-black.svg)](https://flask.palletsprojects.com/)
 [![Gemini AI](https://img.shields.io/badge/Gemini-AI-orange.svg)](https://ai.google.dev/)
 [![微信小程序](https://img.shields.io/badge/微信小程序-1.06.2307260-green.svg)](https://developers.weixin.qq.com/miniprogram/dev/framework/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/YOUR_USERNAME/fashion-ai-app.svg)](https://github.com/YOUR_USERNAME/fashion-ai-app/stargazers)
-[![GitHub issues](https://img.shields.io/github/issues/YOUR_USERNAME/fashion-ai-app.svg)](https://github.com/YOUR_USERNAME/fashion-ai-app/issues)
-
 > 🚀 一个基于Google Gemini AI的智能穿搭推荐微信小程序，通过AI图像分析为用户提供个性化服装搭配建议
 
 ## ✨ 主要功能
@@ -15,6 +12,8 @@
 ### 🎨 核心功能
 - **📸 智能图像分析**: 拍照或上传服装图片，AI自动识别服装类型、颜色、风格、材质等
 - **🎯 个性化推荐**: 根据用户选择的风格偏好（优雅通勤风、甜美约会风、休闲日常风）提供定制化搭配建议
+- **🌤 天气穿搭**: 获取当前位置天气并给出当天穿衣建议
+- **👤 个人中心**: 支持历史记录、收藏搭配、衣橱单品、风格偏好、身材信息和反馈
 - **📱 移动端优化**: 专为微信小程序优化的轻量级移动端应用
 - **🤖 Gemini AI集成**: 利用Google Gemini的强大多模态AI能力，实现精准的图像理解和智能文本生成
 
@@ -29,7 +28,7 @@
 ### 后端 (Backend)
 - **框架**: Flask 3.0+
 - **AI引擎**: Google Gemini AI API
-- **图像处理**: PIL, OpenCV
+- **图像处理**: Pillow, ColorThief
 - **配置管理**: python-dotenv
 - **跨域支持**: Flask-CORS
 
@@ -80,15 +79,16 @@
 │       ├── app.json          # 小程序配置
 │       ├── app.wxss          # 全局样式
 │       ├── project.config.json # 项目配置
-│       ├── components/       # 公共组件
-│       │   ├── camera-panel/ # 相机组件
-│       │   ├── loading/      # 加载组件
-│       │   └── result-card/  # 结果卡片组件
 │       ├── pages/            # 页面
 │       │   ├── index/        # 首页
 │       │   ├── camera/       # 拍照页面
 │       │   ├── result/       # 结果页面
-│       │   └── profile/      # 个人页面
+│       │   ├── profile/      # 个人页面
+│       │   ├── preference/   # 风格偏好
+│       │   ├── bodyinfo/     # 身材信息
+│       │   ├── feedback/     # 意见反馈
+│       │   └── about/        # 关于我们
+│       ├── config/           # 前端接口配置
 │       ├── images/           # 图片资源
 │       └── utils/            # 工具函数
 │           ├── api.js        # API调用
@@ -108,7 +108,7 @@
 
 ### 📋 环境要求
 
-- **Python**: 3.8 或更高版本
+- **Python**: 3.10 或更高版本
 - **Node.js**: 16+ (可选，用于开发工具)
 - **微信开发者工具**: 最新版本
 - **Git**: 2.0+
@@ -117,8 +117,7 @@
 
 #### 1. 克隆项目
 ```bash
-git clone https://github.com/YOUR_USERNAME/fashion-ai-app.git
-cd fashion-ai-app
+cd 穿搭ai项目
 ```
 
 #### 2. 后端设置
@@ -160,7 +159,7 @@ cd src/frontend
 ```bash
 # Gemini AI 配置
 GEMINI_API_KEY=your_gemini_api_key
-GEMINI_MODEL=gemini-pro-vision
+GEMINI_MODEL=gemini-1.5-flash
 
 # Flask 配置
 FLASK_ENV=development
@@ -181,6 +180,14 @@ PORT=5001
     "urlCheck": false
   }
 }
+```
+
+#### 前端 API 地址
+编辑 `src/frontend/config/index.js`：
+
+```javascript
+const API_BASE_URL = 'http://localhost:5001/api'; // 开发环境
+// const API_BASE_URL = 'https://your-domain.com/api'; // 生产环境
 ```
 
 ## 📖 使用指南
@@ -221,6 +228,11 @@ Content-Type: application/json
 }
 ```
 
+#### 天气穿搭
+```http
+GET /api/weather?latitude=31.2&longitude=121.5
+```
+
 ### 📱 开发调试
 
 #### 后端调试
@@ -250,7 +262,7 @@ http://localhost:5001
 
 ### 🐛 报告问题
 
-使用 [GitHub Issues](https://github.com/YOUR_USERNAME/fashion-ai-app/issues) 报告bug或请求新功能。
+通过项目维护渠道报告 bug 或请求新功能。
 
 ### 📋 提交规范
 
@@ -277,12 +289,6 @@ git commit -m "test: 添加单元测试"
 git commit -m "chore: 更新构建配置"
 ```
 
-## 📊 项目统计
-
-![GitHub语言统计](https://img.shields.io/github/languages/top/YOUR_USERNAME/fashion-ai-app)
-![GitHub代码大小](https://img.shields.io/github/repo-size/YOUR_USERNAME/fashion-ai-app)
-![GitHub最后提交](https://img.shields.io/github/last-commit/YOUR_USERNAME/fashion-ai-app)
-
 ## 🔄 CI/CD
 
 本项目使用 GitHub Actions 进行持续集成和部署：
@@ -301,25 +307,11 @@ git commit -m "chore: 更新构建配置"
 - **微信小程序**: 优秀的移动端开发平台
 - **开源社区**: 感谢所有贡献者和灵感来源
 
-## 📞 联系我们
-
-- **项目主页**: [GitHub Repository](https://github.com/YOUR_USERNAME/fashion-ai-app)
-- **问题反馈**: [GitHub Issues](https://github.com/YOUR_USERNAME/fashion-ai-app/issues)
-- **邮箱**: your-email@example.com
-
 ---
-
-<div align="center">
-
-**如果这个项目对你有帮助，请给我们一个 ⭐ Star！**
-
-Made with ❤️ by [Your Name]
-
-</div>
 
 ## 环境要求
 
-- Python 3.8+
+- Python 3.10+
 - Node.js (用于微信开发者工具)
 - 微信开发者工具
 

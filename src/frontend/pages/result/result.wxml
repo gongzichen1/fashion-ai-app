@@ -15,7 +15,7 @@
         <view class="collect-btn" bindtap="toggleCollect">
           <image
             class="collect-icon"
-            src="{{collectStatus ? '/images/icon-collect-active.png' : '/images/icon-collect.png'}}"
+            src="{{collectStatus ? '/images/icon-collect-active.svg' : '/images/icon-collect.svg'}}"
           ></image>
         </view>
       </view>
@@ -115,7 +115,7 @@
 
       <!-- 空状态 -->
       <view class="empty-state" wx:if="{{recommendations.length === 0}}">
-        <image class="empty-icon" src="/images/empty.png"></image>
+        <image class="empty-icon" src="/images/empty.svg"></image>
         <text class="empty-text">暂无该场景的搭配推荐</text>
       </view>
     </view>
@@ -131,16 +131,20 @@
     <!-- 底部操作栏 -->
     <view class="bottom-bar">
       <button class="action-btn share-btn" open-type="share">
-        <image class="btn-icon" src="/images/icon-share.png"></image>
+        <image class="btn-icon" src="/images/icon-share.svg"></image>
         分享
       </button>
       <button class="action-btn save-btn" bindtap="saveImage">
-        <image class="btn-icon" src="/images/icon-save.png"></image>
+        <image class="btn-icon" src="/images/icon-save.svg"></image>
         保存
       </button>
       <button class="action-btn retake-btn" bindtap="retake">
         <image class="btn-icon" src="/images/icon-camera.png"></image>
         重拍
+      </button>
+      <button class="action-btn home-btn" bindtap="goHome">
+        <image class="btn-icon" src="/images/tab-home.png"></image>
+        首页
       </button>
     </view>
   </block>

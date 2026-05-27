@@ -1,0 +1,56 @@
+.page {
+  min-height: 100vh;
+  padding: 30rpx;
+  background-color: #F8F8F8;
+}
+
+.form-card {
+  padding: 30rpx;
+  border-radius: 20rpx;
+  background-color: #FFFFFF;
+}
+
+.label {
+  display: block;
+  margin-bottom: 14rpx;
+  color: #333;
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+.contact-label {
+  margin-top: 28rpx;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 240rpx;
+  padding: 20rpx;
+  box-sizing: border-box;
+  border-radius: 14rpx;
+  background-color: #F5F5F5;
+  color: #333;
+  font-size: 28rpx;
+}
+
+.input {
+  height: 88rpx;
+  padding: 0 24rpx;
+  border-radius: 14rpx;
+  background-color: #F5F5F5;
+  color: #333;
+  font-size: 28rpx;
+}
+
+.submit-btn {
+  margin-top: 30rpx;
+  border: none;
+  border-radius: 44rpx;
+  background: linear-gradient(135deg, #FF6B9D 0%, #FF8FB1 100%);
+  color: #FFFFFF;
+  font-size: 30rpx;
+}
+
+.submit-btn::after {
+  border: none;
+}

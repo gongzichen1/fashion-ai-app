@@ -3,10 +3,13 @@
 import os
 import base64
 import uuid
-from io import BytesIO
+import logging
 from PIL import Image
 from colorthief import ColorThief
 from config.settings import Config
+
+
+logger = logging.getLogger(__name__)
 
 
 class ImageService:
@@ -101,7 +104,7 @@ class ImageService:
             palette = color_thief.get_palette(color_count=color_count)
             return palette
         except Exception as e:
-            print(f"颜色提取错误: {e}")
+            logger.warning('颜色提取失败: %s', e)
             return [(255, 107, 157)]  # 默认粉色
 
     @staticmethod

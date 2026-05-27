@@ -1,0 +1,52 @@
+.page {
+  min-height: 100vh;
+  padding: 30rpx;
+  background-color: #F8F8F8;
+}
+
+.section {
+  margin-bottom: 28rpx;
+  padding: 30rpx;
+  border-radius: 20rpx;
+  background-color: #FFFFFF;
+}
+
+.section-title {
+  display: block;
+  margin-bottom: 20rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.tag {
+  padding: 14rpx 26rpx;
+  border-radius: 30rpx;
+  background-color: #F5F5F5;
+  color: #666;
+  font-size: 26rpx;
+}
+
+.tag.active {
+  background-color: #FFE4EC;
+  color: #FF6B9D;
+}
+
+.save-btn {
+  margin-top: 20rpx;
+  border: none;
+  border-radius: 44rpx;
+  background: linear-gradient(135deg, #FF6B9D 0%, #FF8FB1 100%);
+  color: #FFFFFF;
+  font-size: 30rpx;
+}
+
+.save-btn::after {
+  border: none;
+}

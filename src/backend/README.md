@@ -2,7 +2,7 @@
 
 ## 环境要求
 
-- Python 3.8+
+- Python 3.10+
 - pip
 
 ## 安装步骤
@@ -31,7 +31,7 @@ cp .env.example .env
 ```
 
 必填配置：
-- `ZHIPU_API_KEY`: 智谱AI的API密钥
+- `GEMINI_API_KEY`: Gemini API 密钥。未配置时接口仍可运行，但会返回演示兜底分析结果。
 
 ### 4. 启动服务
 
@@ -39,7 +39,7 @@ cp .env.example .env
 python app.py
 ```
 
-服务默认运行在 http://localhost:5000
+服务默认运行在 http://localhost:5001
 
 ## API接口
 
@@ -55,6 +55,9 @@ python app.py
 
 ### POST /api/recommend
 根据分析结果生成推荐
+
+### GET /api/weather
+根据 `latitude` 和 `longitude` 获取当前天气和穿搭建议
 
 ### GET /api/result/<id>
 获取历史分析结果

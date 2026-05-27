@@ -2,9 +2,12 @@
 
 import base64
 import json
-# from zhipuai import ZhipuAI
-import google.generativeai as genai
+import logging
+from google import genai
 from config.settings import Config
+
+
+logger = logging.getLogger(__name__)
 
 
 class AIService:
@@ -12,8 +15,11 @@ class AIService:
 
     def __init__(self):
         # 配置Gemini API
-        genai.configure(api_key=Config.GEMINI_API_KEY)
-        self.model = genai.GenerativeModel(Config.GEMINI_MODEL)
+        self.client = None
+        if Config.GEMINI_API_KEY:
+            self.client = genai.Client(api_key=Config.GEMINI_API_KEY)
+        else:
+            logger.warning('GEMINI_API_KEY 未配置，AI分析将使用默认兜底结果')
 
     def analyze_image(self, image_base64: str, style_preference: dict = None) -> dict:
         """
@@ -27,6 +33,9 @@ class AIService:
             服装分析结果
         """
         preference_text = ""
+        if not self.client:
+            return self._get_default_analysis()
+
         if style_preference:
             preference_text = f"""
 用户偏好信息：
@@ -67,10 +76,10 @@ class AIService:
             image_data = base64.b64decode(image_base64)
             image = Image.open(io.BytesIO(image_data))
             
-            response = self.model.generate_content([
-                prompt,
-                image
-            ])
+            response = self.client.models.generate_content(
+                model=Config.GEMINI_MODEL,
+                contents=[prompt, image]
+            )
             
             result_text = response.text
 
@@ -86,11 +95,10 @@ class AIService:
             return result
 
         except json.JSONDecodeError as e:
-            print(f"JSON解析错误: {e}")
-            # 返回默认值
+            logger.warning('AI分析JSON解析失败: %s', e)
             return self._get_default_analysis()
         except Exception as e:
-            print(f"AI分析错误: {e}")
+            logger.exception('AI分析失败: %s', e)
             return self._get_default_analysis()
 
     def generate_recommendations(self, analysis_result: dict, user_preference: dict = None) -> dict:
@@ -105,6 +113,9 @@ class AIService:
             搭配推荐结果
         """
         preference_text = ""
+        if not self.client:
+            return self._get_default_recommendations(analysis_result)
+
         if user_preference:
             preference_text = f"""
 用户偏好信息：
@@ -154,7 +165,10 @@ class AIService:
 
         try:
             # 使用Gemini生成推荐
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(
+                model=Config.GEMINI_MODEL,
+                contents=prompt
+            )
             
             result_text = response.text
             result_text = result_text.strip()
@@ -168,7 +182,7 @@ class AIService:
             return result
 
         except Exception as e:
-            print(f"推荐生成错误: {e}")
+            logger.exception('推荐生成失败: %s', e)
             return self._get_default_recommendations(analysis_result)
 
     def _get_default_analysis(self) -> dict:

@@ -30,9 +30,9 @@ REM 检查环境变量
 if not exist ".env" (
     echo.
     echo 警告: 未找到.env文件
-    echo 请复制.env.example为.env并填入智谱AI的API密钥
+    echo 请复制.env.example为.env并填入Gemini API密钥
     echo.
-    set /p continue="是否继续启动（无API密钥将无法使用AI功能）? [y/N]: "
+    set /p continue="是否继续启动（无API密钥将使用演示兜底结果）? [y/N]: "
     if /i not "%continue%"=="y" exit /b 1
 )
 

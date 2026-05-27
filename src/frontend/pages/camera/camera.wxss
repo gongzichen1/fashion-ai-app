@@ -107,6 +107,17 @@
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+.home-btn {
+  position: absolute;
+  left: 30rpx;
+  top: -76rpx;
+  padding: 14rpx 24rpx;
+  border-radius: 30rpx;
+  background-color: rgba(0, 0, 0, 0.55);
+  color: #FFFFFF;
+  font-size: 26rpx;
+}
+
 /* 顶部工具栏 */
 .top-bar {
   position: absolute;

@@ -1,0 +1,46 @@
+.page {
+  min-height: 100vh;
+  padding: 60rpx 30rpx;
+  background-color: #F8F8F8;
+  text-align: center;
+}
+
+.logo {
+  width: 140rpx;
+  height: 140rpx;
+  margin-bottom: 20rpx;
+}
+
+.title {
+  display: block;
+  color: #333;
+  font-size: 38rpx;
+  font-weight: 600;
+}
+
+.version {
+  display: block;
+  margin-top: 8rpx;
+  color: #999;
+  font-size: 26rpx;
+}
+
+.card {
+  margin-top: 40rpx;
+  padding: 30rpx;
+  border-radius: 20rpx;
+  background-color: #FFFFFF;
+  text-align: left;
+}
+
+.paragraph {
+  display: block;
+  margin-bottom: 18rpx;
+  color: #666;
+  font-size: 28rpx;
+  line-height: 1.7;
+}
+
+.paragraph:last-child {
+  margin-bottom: 0;
+}

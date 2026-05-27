@@ -1,0 +1,9 @@
+<view class="page">
+  <view class="form-card">
+    <text class="label">反馈内容</text>
+    <textarea class="textarea" value="{{content}}" data-field="content" bindinput="onInput" placeholder="请描述你遇到的问题或建议" maxlength="300" />
+    <text class="label contact-label">联系方式</text>
+    <input class="input" value="{{contact}}" data-field="contact" bindinput="onInput" placeholder="选填，便于我们联系你" />
+  </view>
+  <button class="submit-btn" bindtap="submitFeedback">提交反馈</button>
+</view>

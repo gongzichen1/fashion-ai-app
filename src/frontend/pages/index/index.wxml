@@ -18,13 +18,36 @@
     </view>
   </view>
 
+  <!-- 天气穿搭 -->
+  <view class="weather-card" bindtap="loadWeather">
+    <view class="weather-main" wx:if="{{weather}}">
+      <view class="weather-info">
+        <text class="weather-title">今日天气</text>
+        <text class="weather-temp">{{weather.temperature}}°C</text>
+        <text class="weather-desc">{{weather.condition}} · {{weather.windText}}</text>
+      </view>
+      <view class="weather-advice">
+        <text class="weather-advice-title">穿搭建议</text>
+        <text class="weather-advice-text">{{weather.outfitAdvice}}</text>
+      </view>
+    </view>
+
+    <view class="weather-placeholder" wx:else>
+      <view class="weather-info">
+        <text class="weather-title">今日天气</text>
+        <text class="weather-desc">{{weatherError || '点击获取当地天气与穿搭建议'}}</text>
+      </view>
+      <text class="weather-action">{{weatherLoading ? '获取中...' : '获取天气'}}</text>
+    </view>
+  </view>
+
   <!-- 功能入口 -->
   <view class="section">
     <view class="section-header">
       <text class="section-title">核心功能</text>
     </view>
     <view class="feature-grid">
-      <view class="feature-item" wx:for="{{features}}" wx:key="id">
+      <view class="feature-item" wx:for="{{features}}" wx:key="title" bindtap="onFeatureTap" data-action="{{item.action}}">
         <image class="feature-icon" src="{{item.icon}}" mode="aspectFit"></image>
         <text class="feature-title">{{item.title}}</text>
         <text class="feature-desc">{{item.desc}}</text>
@@ -36,7 +59,7 @@
   <view class="section" wx:if="{{recentHistory.length > 0}}">
     <view class="section-header">
       <text class="section-title">最近分析</text>
-      <text class="section-more" bindtap="goToCamera">查看更多</text>
+      <text class="section-more" bindtap="goToProfile">查看更多</text>
     </view>
     <scroll-view class="history-scroll" scroll-x>
       <view class="history-item" wx:for="{{recentHistory}}" wx:key="id" bindtap="goToResult" data-id="{{item.id}}">

@@ -1,0 +1,42 @@
+<view class="page">
+  <view class="section">
+    <text class="section-title">喜欢的风格</text>
+    <view class="tag-list">
+      <view
+        class="tag {{item.selected ? 'active' : ''}}"
+        wx:for="{{styleOptions}}"
+        wx:key="name"
+        bindtap="toggleStyle"
+        data-value="{{item.name}}"
+      >{{item.name}}</view>
+    </view>
+  </view>
+
+  <view class="section">
+    <text class="section-title">常穿场景</text>
+    <view class="tag-list">
+      <view
+        class="tag {{item.selected ? 'active' : ''}}"
+        wx:for="{{sceneOptions}}"
+        wx:key="name"
+        bindtap="toggleScene"
+        data-value="{{item.name}}"
+      >{{item.name}}</view>
+    </view>
+  </view>
+
+  <view class="section">
+    <text class="section-title">预算范围</text>
+    <view class="tag-list">
+      <view
+        class="tag {{budget === item ? 'active' : ''}}"
+        wx:for="{{budgets}}"
+        wx:key="*this"
+        bindtap="chooseBudget"
+        data-value="{{item}}"
+      >{{item}}</view>
+    </view>
+  </view>
+
+  <button class="save-btn" bindtap="savePreference">保存偏好</button>
+</view>

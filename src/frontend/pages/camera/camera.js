@@ -8,7 +8,8 @@ Page({
     showGuide: true, // 显示拍摄引导
     analyzing: false, // 分析中
     previewImage: null, // 预览图片
-    tempImagePath: null // 临时图片路径
+    tempImagePath: null, // 临时图片路径
+    selectedStyle: null
   },
 
   onLoad() {
@@ -141,17 +142,22 @@ Page({
       const result = await this.uploadAndAnalyze(this.data.tempImagePath);
 
       // 保存到历史记录
+      const resultWithLocalImage = {
+        ...result,
+        image: this.data.tempImagePath || result.image,
+        serverImage: result.image
+      };
       const historyItem = {
-        id: result.id || Date.now().toString(),
-        image: this.data.tempImagePath,
-        garmentType: result.garmentType,
+        ...resultWithLocalImage,
+        id: resultWithLocalImage.id || Date.now().toString(),
+        garmentType: resultWithLocalImage.garmentType || 'AI分析结果',
         timestamp: Date.now()
       };
       app.saveHistory(historyItem);
 
       // 跳转到结果页
       wx.navigateTo({
-        url: `/pages/result/result?data=${encodeURIComponent(JSON.stringify(result))}`
+        url: `/pages/result/result?data=${encodeURIComponent(JSON.stringify(historyItem))}`
       });
     } catch (error) {
       console.error('分析失败:', error);
@@ -207,6 +213,13 @@ Page({
     wx.showToast({
       title: '相机启动失败',
       icon: 'none'
+    });
+  },
+
+  // 返回首页
+  goHome() {
+    wx.switchTab({
+      url: '/pages/index/index'
     });
   }
 });

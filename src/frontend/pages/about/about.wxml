@@ -1,0 +1,9 @@
+<view class="page">
+  <image class="logo" src="/images/logo.png" mode="aspectFit"></image>
+  <text class="title">智搭</text>
+  <text class="version">v1.0.0</text>
+  <view class="card">
+    <text class="paragraph">智搭通过拍照识别服装，结合天气、场景和个人偏好生成穿搭建议。</text>
+    <text class="paragraph">当前版本支持拍照分析、天气穿搭、历史记录、收藏搭配和本地衣橱。</text>
+  </view>
+</view>

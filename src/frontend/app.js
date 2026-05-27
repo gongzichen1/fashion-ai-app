@@ -1,9 +1,12 @@
 // app.js - 小程序入口文件
+const { API_BASE_URL } = require('./config/index');
+
 App({
   globalData: {
     userInfo: null,
-    apiBaseUrl: 'http://localhost:5001/api', // 后端API地址，上线时改为正式域名
-    uploadHistory: []
+    apiBaseUrl: API_BASE_URL,
+    uploadHistory: [],
+    collectList: []
   },
 
   onLaunch() {
@@ -11,6 +14,7 @@ App({
     this.checkLoginStatus();
     // 获取本地存储的历史记录
     this.loadHistory();
+    this.loadCollects();
   },
 
   checkLoginStatus() {
@@ -27,13 +31,40 @@ App({
     }
   },
 
+  loadCollects() {
+    const collects = wx.getStorageSync('collectList');
+    if (collects) {
+      this.globalData.collectList = collects;
+    }
+  },
+
   saveHistory(item) {
+    const index = this.globalData.uploadHistory.findIndex(history => history.id === item.id);
+    if (index >= 0) {
+      this.globalData.uploadHistory.splice(index, 1);
+    }
+
     this.globalData.uploadHistory.unshift(item);
     // 最多保存50条记录
     if (this.globalData.uploadHistory.length > 50) {
       this.globalData.uploadHistory = this.globalData.uploadHistory.slice(0, 50);
     }
     wx.setStorageSync('uploadHistory', this.globalData.uploadHistory);
+  },
+
+  findHistoryById(id) {
+    return this.globalData.uploadHistory.find(item => String(item.id) === String(id));
+  },
+
+  saveCollect(item) {
+    const index = this.globalData.collectList.findIndex(collect => collect.id === item.id);
+    if (index >= 0) {
+      this.globalData.collectList.splice(index, 1);
+    } else {
+      this.globalData.collectList.unshift(item);
+    }
+    wx.setStorageSync('collectList', this.globalData.collectList);
+    return index < 0;
   },
 
   // 获取用户信息

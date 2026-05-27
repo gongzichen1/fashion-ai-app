@@ -256,11 +256,13 @@
 }
 
 .action-btn {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   background: transparent;
-  padding: 10rpx 30rpx;
+  padding: 10rpx 0;
   font-size: 24rpx;
   color: #666;
   border: none;

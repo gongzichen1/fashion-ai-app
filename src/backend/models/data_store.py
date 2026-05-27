@@ -4,14 +4,16 @@ import json
 import os
 from datetime import datetime
 
+from config import Config
+
 
 class DataStore:
     """简单的文件数据存储"""
 
-    def __init__(self, data_dir='data'):
-        self.data_dir = data_dir
-        if not os.path.exists(data_dir):
-            os.makedirs(data_dir)
+    def __init__(self, data_dir=None):
+        self.data_dir = data_dir or Config.DATA_DIR
+        if not os.path.exists(self.data_dir):
+            os.makedirs(self.data_dir)
 
     def _get_file_path(self, collection: str) -> str:
         """获取集合文件路径"""
@@ -21,8 +23,11 @@ class DataStore:
         """加载集合数据"""
         file_path = self._get_file_path(collection)
         if os.path.exists(file_path):
-            with open(file_path, 'r', encoding='utf-8') as f:
-                return json.load(f)
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            except (json.JSONDecodeError, OSError):
+                return []
         return []
 
     def _save_collection(self, collection: str, data: list):
@@ -34,6 +39,8 @@ class DataStore:
     def insert(self, collection: str, document: dict) -> str:
         """插入文档"""
         data = self._load_collection(collection)
+        if not document.get('id'):
+            document['id'] = str(int(datetime.now().timestamp() * 1000))
         document['created_at'] = datetime.now().isoformat()
         document['updated_at'] = datetime.now().isoformat()
         data.append(document)
@@ -57,7 +64,7 @@ class DataStore:
         """查找多个文档"""
         data = self._load_collection(collection)
         if not query:
-            return data[:limit]
+            return list(reversed(data))[:limit]
 
         results = []
         for doc in data:

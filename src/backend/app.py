@@ -23,6 +23,7 @@ def create_app(config_name='default'):
     Returns:
         Flask应用实例
     """
+    config_name = config_name if config_name in config else 'default'
     app = Flask(__name__)
 
     # 加载配置
@@ -31,7 +32,7 @@ def create_app(config_name='default'):
     # 启用CORS
     CORS(app, resources={
         r"/api/*": {
-            "origins": "*",
+            "origins": app.config.get('CORS_ORIGINS', '*'),
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"]
         }
@@ -66,6 +67,7 @@ def create_app(config_name='default'):
                 'health': '/api/health',
                 'analyze': '/api/analyze (POST)',
                 'recommend': '/api/recommend (POST)',
+                'weather': '/api/weather (GET)',
                 'result': '/api/result/<id> (GET)',
                 'history': '/api/history (GET)'
             }

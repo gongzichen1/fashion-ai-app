@@ -1,5 +1,6 @@
 // pages/profile/profile.js - 个人中心页
 const app = getApp();
+const { formatRelativeTime } = require('../../utils/util');
 
 Page({
   data: {
@@ -7,7 +8,8 @@ Page({
     hasUserInfo: false,
     historyList: [],
     collectList: [],
-    currentTab: 'history', // history | collect
+    wardrobeList: [],
+    currentTab: 'history', // history | collect | wardrobe
     menuList: [
       { icon: '/images/icon-style.png', title: '我的风格偏好', desc: '设置喜欢的穿搭风格', path: '/pages/preference/preference' },
       { icon: '/images/icon-body.png', title: '身材信息', desc: '完善身材数据获取更精准推荐', path: '/pages/bodyinfo/bodyinfo' },
@@ -35,8 +37,65 @@ Page({
   },
 
   loadHistory() {
+    const historyList = (app.globalData.uploadHistory || []).map(item => ({
+      ...item,
+      image: this.normalizeImageUrl(item.image),
+      displayTime: this.formatDisplayTime(item.timestamp)
+    }));
+    const collectList = (app.globalData.collectList || []).map(item => ({
+      ...item,
+      image: this.normalizeImageUrl(item.image || item.result?.image),
+      garmentType: item.garmentType || item.result?.garmentType || '收藏搭配',
+      displayTime: this.formatDisplayTime(item.timestamp)
+    }));
+    const wardrobeList = this.buildWardrobeList(historyList);
+
     this.setData({
-      historyList: app.globalData.uploadHistory || []
+      historyList,
+      collectList,
+      wardrobeList
+    });
+  },
+
+  formatDisplayTime(timestamp) {
+    if (!timestamp) {
+      return '';
+    }
+    return typeof timestamp === 'number' ? formatRelativeTime(timestamp) : timestamp;
+  },
+
+  normalizeImageUrl(url) {
+    if (!url || /^https?:\/\//.test(url) || url.startsWith('wxfile://')) {
+      return url;
+    }
+
+    if (url.startsWith('/uploads/') || url.startsWith('/static/')) {
+      return `${app.globalData.apiBaseUrl.replace(/\/api$/, '')}${url}`;
+    }
+
+    return url;
+  },
+
+  buildWardrobeList(historyList) {
+    return historyList.flatMap(history => {
+      const mainItem = {
+        id: `${history.id}_main`,
+        resultId: history.id,
+        name: history.garmentType || '识别单品',
+        type: history.category || '已分析服装',
+        image: history.image,
+        displayTime: history.displayTime
+      };
+      const recommendItems = (history.recommendations || []).map((item, index) => ({
+        id: `${history.id}_rec_${item.id || index}`,
+        resultId: history.id,
+        name: item.name || item.type || '推荐单品',
+        type: item.type || '搭配单品',
+        image: this.normalizeImageUrl(item.image),
+        displayTime: history.displayTime
+      }));
+
+      return [mainItem, ...recommendItems];
     });
   },
 
@@ -60,11 +119,29 @@ Page({
     this.setData({ currentTab: tab });
   },
 
+  switchToStat(e) {
+    this.setData({ currentTab: e.currentTarget.dataset.tab });
+  },
+
   // 查看历史详情
   viewHistory(e) {
     const { id } = e.currentTarget.dataset;
     wx.navigateTo({
       url: `/pages/result/result?id=${id}`
+    });
+  },
+
+  viewCollect(e) {
+    const { id } = e.currentTarget.dataset;
+    wx.navigateTo({
+      url: `/pages/result/result?id=${id}`
+    });
+  },
+
+  viewWardrobeItem(e) {
+    const { resultId } = e.currentTarget.dataset;
+    wx.navigateTo({
+      url: `/pages/result/result?id=${resultId}`
     });
   },
 
@@ -114,7 +191,18 @@ Page({
     const { path } = e.currentTarget.dataset;
     if (path) {
       wx.navigateTo({ url: path });
+    } else {
+      wx.showToast({
+        title: '暂不可用',
+        icon: 'none'
+      });
     }
+  },
+
+  goToCamera() {
+    wx.switchTab({
+      url: '/pages/camera/camera'
+    });
   },
 
   // 清除缓存
@@ -125,13 +213,19 @@ Page({
       success: (res) => {
         if (res.confirm) {
           wx.clearStorageSync();
+          app.globalData.uploadHistory = [];
+          app.globalData.collectList = [];
+          app.globalData.userInfo = null;
           wx.showToast({
             title: '清除成功',
             icon: 'success'
           });
           this.setData({
             historyList: [],
-            collectList: []
+            collectList: [],
+            wardrobeList: [],
+            hasUserInfo: false,
+            userInfo: null
           });
         }
       }

@@ -5,14 +5,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+PROJECT_DIR = os.path.dirname(os.path.dirname(BASE_DIR))
+
+
 class Config:
     """基础配置"""
     SECRET_KEY = os.getenv('SECRET_KEY', 'zhida-secret-key-2024')
-
-    # 智谱AI配置
-    # ZHIPU_API_KEY = os.getenv('ZHIPU_API_KEY', '')
-    # ZHIPU_MODEL = 'glm-4v'  # 视觉模型，用于图像理解
-    # ZHIPU_TEXT_MODEL = 'glm-4'  # 文本模型，用于推荐生成
 
     # Gemini配置
     GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
@@ -24,12 +24,14 @@ class Config:
     DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
     # 上传配置
-    UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'uploads')
+    UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', os.path.join(BASE_DIR, 'uploads'))
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 最大16MB
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
-    # 数据库配置（后续扩展用）
+    # 数据存储配置
+    DATA_DIR = os.getenv('DATA_DIR', os.path.join(PROJECT_DIR, 'data'))
     DATABASE_URL = os.getenv('DATABASE_URL', '')
+    CORS_ORIGINS = os.getenv('CORS_ORIGINS', '*')
 
 class DevelopmentConfig(Config):
     """开发环境配置"""

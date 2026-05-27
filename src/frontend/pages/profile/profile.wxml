@@ -2,35 +2,35 @@
 <view class="profile-page">
   <!-- 用户信息区域 -->
   <view class="user-section">
-    <view class="user-info" wx:if="{{hasUserInfo}}">
+    <view class="user-info" wx:if="{{hasUserInfo}}" bindtap="getUserProfile">
       <image class="avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
       <view class="user-detail">
         <text class="nickname">{{userInfo.nickName}}</text>
-        <text class="user-tip">让AI帮你成为时尚达人</text>
+        <text class="user-tip">点击编辑头像昵称</text>
       </view>
     </view>
 
     <button class="login-btn" wx:else bindtap="getUserProfile">
-      <image class="avatar-default" src="/images/avatar-default.png"></image>
+      <image class="avatar-default" src="/images/avatar-default.svg"></image>
       <text class="login-text">点击登录</text>
     </button>
   </view>
 
   <!-- 数据统计 -->
   <view class="stats-bar">
-    <view class="stat-item">
+    <view class="stat-item" bindtap="switchToStat" data-tab="history">
       <text class="stat-num">{{historyList.length}}</text>
       <text class="stat-label">分析记录</text>
     </view>
     <view class="stat-divider"></view>
-    <view class="stat-item">
+    <view class="stat-item" bindtap="switchToStat" data-tab="collect">
       <text class="stat-num">{{collectList.length || 0}}</text>
       <text class="stat-label">收藏搭配</text>
     </view>
     <view class="stat-divider"></view>
-    <view class="stat-item">
-      <text class="stat-num">0</text>
-      <text class="stat-label">获赞</text>
+    <view class="stat-item" bindtap="switchToStat" data-tab="wardrobe">
+      <text class="stat-num">{{wardrobeList.length || 0}}</text>
+      <text class="stat-label">衣橱单品</text>
     </view>
   </view>
 
@@ -51,6 +51,13 @@
       >
         我的收藏
       </view>
+      <view
+        class="tab-item {{currentTab === 'wardrobe' ? 'active' : ''}}"
+        bindtap="switchTab"
+        data-tab="wardrobe"
+      >
+        我的衣橱
+      </view>
     </view>
 
     <!-- 历史记录列表 -->
@@ -61,19 +68,19 @@
             <image class="history-image" src="{{item.image}}" mode="aspectFill"></image>
             <view class="history-detail">
               <text class="history-title">{{item.garmentType}}</text>
-              <text class="history-time">{{item.timestamp}}</text>
+              <text class="history-time">{{item.displayTime}}</text>
             </view>
           </view>
           <view class="history-actions">
             <view class="action-delete" catchtap="deleteHistory" data-id="{{item.id}}" data-index="{{index}}">
-              <image class="delete-icon" src="/images/icon-delete.png"></image>
+              <image class="delete-icon" src="/images/icon-delete.svg"></image>
             </view>
           </view>
         </view>
       </view>
 
       <view class="empty-state" wx:else>
-        <image class="empty-icon" src="/images/empty-history.png"></image>
+        <image class="empty-icon" src="/images/empty.svg"></image>
         <text class="empty-text">暂无历史记录</text>
         <text class="empty-tip">快去拍照获取搭配推荐吧</text>
         <button class="empty-btn" bindtap="goToCamera">去拍照</button>
@@ -87,15 +94,45 @@
     <!-- 收藏列表 -->
     <view class="tab-content" wx:if="{{currentTab === 'collect'}}">
       <view class="collect-list" wx:if="{{collectList.length > 0}}">
-        <view class="collect-item" wx:for="{{collectList}}" wx:key="id">
-          <text>{{item.name}}</text>
+        <view class="history-item" wx:for="{{collectList}}" wx:key="id">
+          <view class="history-info" bindtap="viewCollect" data-id="{{item.id}}">
+            <image class="history-image" src="{{item.image}}" mode="aspectFill"></image>
+            <view class="history-detail">
+              <text class="history-title">{{item.garmentType}}</text>
+              <text class="history-time">{{item.displayTime}}</text>
+            </view>
+          </view>
         </view>
       </view>
 
       <view class="empty-state" wx:else>
-        <image class="empty-icon" src="/images/empty-collect.png"></image>
+        <image class="empty-icon" src="/images/empty.svg"></image>
         <text class="empty-text">暂无收藏</text>
         <text class="empty-tip">喜欢的搭配可以收藏起来哦</text>
+      </view>
+    </view>
+
+    <!-- 衣橱列表 -->
+    <view class="tab-content" wx:if="{{currentTab === 'wardrobe'}}">
+      <view class="wardrobe-grid" wx:if="{{wardrobeList.length > 0}}">
+        <view
+          class="wardrobe-item"
+          wx:for="{{wardrobeList}}"
+          wx:key="id"
+          bindtap="viewWardrobeItem"
+          data-result-id="{{item.resultId}}"
+        >
+          <image class="wardrobe-image" src="{{item.image}}" mode="aspectFill"></image>
+          <text class="wardrobe-name">{{item.name}}</text>
+          <text class="wardrobe-type">{{item.type}}</text>
+        </view>
+      </view>
+
+      <view class="empty-state" wx:else>
+        <image class="empty-icon" src="/images/empty.svg"></image>
+        <text class="empty-text">暂无衣橱单品</text>
+        <text class="empty-tip">完成一次AI分析后会自动加入衣橱</text>
+        <button class="empty-btn" bindtap="goToCamera">去拍照</button>
       </view>
     </view>
   </view>
@@ -114,7 +151,7 @@
         <text class="menu-title">{{item.title}}</text>
         <text class="menu-desc">{{item.desc}}</text>
       </view>
-      <image class="menu-arrow" src="/images/icon-arrow.png"></image>
+      <image class="menu-arrow" src="/images/icon-arrow.svg"></image>
     </view>
   </view>
 

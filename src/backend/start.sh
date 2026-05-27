@@ -30,10 +30,10 @@ pip install -r requirements.txt -q
 if [ ! -f ".env" ]; then
     echo ""
     echo "警告: 未找到.env文件"
-    echo "请复制.env.example为.env并填入智谱AI的API密钥"
+    echo "请复制.env.example为.env并填入Gemini API密钥"
     echo "命令: cp .env.example .env"
     echo ""
-    read -p "是否继续启动（无API密钥将无法使用AI功能）? [y/N] " -n 1 -r
+    read -p "是否继续启动（无API密钥将使用演示兜底结果）? [y/N] " -n 1 -r
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         exit 1
