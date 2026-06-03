@@ -17,14 +17,14 @@ class DataStore:
 
     def _get_file_path(self, collection: str) -> str:
         """获取集合文件路径"""
-        return os.path.join(self.data_dir, f'{collection}.json')
+        return os.path.join(self.data_dir, f"{collection}.json")
 
     def _load_collection(self, collection: str) -> list:
         """加载集合数据"""
         file_path = self._get_file_path(collection)
         if os.path.exists(file_path):
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, "r", encoding="utf-8") as f:
                     return json.load(f)
             except (json.JSONDecodeError, OSError):
                 return []
@@ -33,19 +33,19 @@ class DataStore:
     def _save_collection(self, collection: str, data: list):
         """保存集合数据"""
         file_path = self._get_file_path(collection)
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
     def insert(self, collection: str, document: dict) -> str:
         """插入文档"""
         data = self._load_collection(collection)
-        if not document.get('id'):
-            document['id'] = str(int(datetime.now().timestamp() * 1000))
-        document['created_at'] = datetime.now().isoformat()
-        document['updated_at'] = datetime.now().isoformat()
+        if not document.get("id"):
+            document["id"] = str(int(datetime.now().timestamp() * 1000))
+        document["created_at"] = datetime.now().isoformat()
+        document["updated_at"] = datetime.now().isoformat()
         data.append(document)
         self._save_collection(collection, data)
-        return document.get('id')
+        return document.get("id")
 
     def find_one(self, collection: str, query: dict) -> dict:
         """查找单个文档"""
@@ -90,7 +90,7 @@ class DataStore:
                     break
             if match:
                 doc.update(update)
-                doc['updated_at'] = datetime.now().isoformat()
+                doc["updated_at"] = datetime.now().isoformat()
                 data[i] = doc
                 self._save_collection(collection, data)
                 return True

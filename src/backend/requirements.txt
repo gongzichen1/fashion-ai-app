@@ -8,7 +8,6 @@ requests==2.31.0
 Pillow==10.1.0
 colorthief==0.2.1
 gunicorn==21.2.0
-google-genai==1.47.0
 
 # 开发依赖 (可选)
 # pytest==7.4.0

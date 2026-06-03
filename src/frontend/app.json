@@ -11,9 +11,9 @@
   ],
   "window": {
     "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#FF6B9D",
+    "navigationBarBackgroundColor": "#F8F6F2",
     "navigationBarTitleText": "智搭",
-    "navigationBarTextStyle": "white"
+    "navigationBarTextStyle": "black"
   },
   "permission": {
     "scope.userLocation": {
@@ -21,9 +21,9 @@
     }
   },
   "tabBar": {
-    "color": "#999999",
-    "selectedColor": "#FF6B9D",
-    "backgroundColor": "#ffffff",
+    "color": "#9B9BA8",
+    "selectedColor": "#D79AB4",
+    "backgroundColor": "#FFFFFF",
     "borderStyle": "white",
     "list": [
       {

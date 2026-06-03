@@ -3,23 +3,86 @@
 import base64
 import json
 import logging
-from google import genai
-from config.settings import Config
+import re
 
+import requests
+from config.settings import Config
 
 logger = logging.getLogger(__name__)
 
 
 class AIService:
-    """AI服务类 - 封装Gemini AI的调用"""
+    """AI服务类 - 封装OpenAI兼容大模型调用"""
 
     def __init__(self):
-        # 配置Gemini API
-        self.client = None
-        if Config.GEMINI_API_KEY:
-            self.client = genai.Client(api_key=Config.GEMINI_API_KEY)
+        self.api_url = self._normalize_chat_url(Config.AI_API_URL)
+        self.api_key = Config.AI_API_KEY
+        self.model = Config.AI_MODEL
+        self.timeout = Config.AI_TIMEOUT
+
+        if self.api_url and self.api_key and self.model:
+            logger.info("AI服务已配置OpenAI兼容接口，模型: %s", self.model)
         else:
-            logger.warning('GEMINI_API_KEY 未配置，AI分析将使用默认兜底结果')
+            logger.warning("AI_API_URL/AI_API_KEY/AI_MODEL 未完整配置，将使用默认兜底结果")
+
+    @staticmethod
+    def _normalize_chat_url(api_url: str) -> str:
+        """兼容传入base url或完整chat completions url。"""
+        api_url = (api_url or "").strip().rstrip("/")
+        if not api_url:
+            return ""
+        if api_url.endswith("/chat/completions"):
+            return api_url
+        return f"{api_url}/chat/completions"
+
+    def _configured(self) -> bool:
+        return bool(self.api_url and self.api_key and self.model)
+
+    def _extract_json(self, text: str) -> dict:
+        """从模型返回中提取JSON对象。"""
+        text = (text or "").strip()
+        if text.startswith("```"):
+            text = re.sub(r"^```(?:json)?\s*", "", text)
+            text = re.sub(r"\s*```$", "", text)
+
+        try:
+            return json.loads(text)
+        except json.JSONDecodeError:
+            match = re.search(r"\{.*\}", text, re.DOTALL)
+            if match:
+                return json.loads(match.group(0))
+            raise
+
+    def _chat_completion(self, messages: list) -> str:
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+        payload = {
+            "model": self.model,
+            "messages": messages,
+            "temperature": 0.3,
+            "response_format": {"type": "json_object"},
+        }
+
+        response = requests.post(
+            self.api_url, headers=headers, json=payload, timeout=self.timeout
+        )
+        response.raise_for_status()
+        body = response.json()
+        choices = body.get("choices") or []
+        if not choices:
+            raise ValueError("模型响应缺少choices")
+
+        message = choices[0].get("message") or {}
+        content = message.get("content")
+        if isinstance(content, list):
+            content = "".join(
+                item.get("text", "") for item in content if isinstance(item, dict)
+            )
+        if not content:
+            raise ValueError("模型响应内容为空")
+        return content
 
     def analyze_image(self, image_base64: str, style_preference: dict = None) -> dict:
         """
@@ -33,7 +96,7 @@ class AIService:
             服装分析结果
         """
         preference_text = ""
-        if not self.client:
+        if not self._configured():
             return self._get_default_analysis()
 
         if style_preference:
@@ -68,40 +131,28 @@ class AIService:
 请只返回JSON数据，不要包含其他文字。"""
 
         try:
-            # 使用Gemini进行图像分析
-            # 将base64转换为PIL Image
-            import io
-            from PIL import Image
-            
-            image_data = base64.b64decode(image_base64)
-            image = Image.open(io.BytesIO(image_data))
-            
-            response = self.client.models.generate_content(
-                model=Config.GEMINI_MODEL,
-                contents=[prompt, image]
-            )
-            
-            result_text = response.text
-
-            # 尝试解析JSON
-            # 有时AI会在JSON前后添加markdown代码块标记，需要处理
-            result_text = result_text.strip()
-            if result_text.startswith('```'):
-                result_text = result_text.split('\n', 1)[1]  # 移除第一行
-            if result_text.endswith('```'):
-                result_text = result_text.rsplit('\n', 1)[0]  # 移除最后一行
-
-            result = json.loads(result_text)
+            image_base64 = image_base64.strip()
+            content = [
+                {"type": "text", "text": prompt},
+                {
+                    "type": "image_url",
+                    "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"},
+                },
+            ]
+            result_text = self._chat_completion([{"role": "user", "content": content}])
+            result = self._extract_json(result_text)
             return result
 
         except json.JSONDecodeError as e:
-            logger.warning('AI分析JSON解析失败: %s', e)
+            logger.warning("AI分析JSON解析失败: %s", e)
             return self._get_default_analysis()
         except Exception as e:
-            logger.exception('AI分析失败: %s', e)
+            logger.exception("AI分析失败: %s", e)
             return self._get_default_analysis()
 
-    def generate_recommendations(self, analysis_result: dict, user_preference: dict = None) -> dict:
+    def generate_recommendations(
+        self, analysis_result: dict, user_preference: dict = None
+    ) -> dict:
         """
         生成搭配推荐
 
@@ -113,7 +164,7 @@ class AIService:
             搭配推荐结果
         """
         preference_text = ""
-        if not self.client:
+        if not self._configured():
             return self._get_default_recommendations(analysis_result)
 
         if user_preference:
@@ -161,28 +212,15 @@ class AIService:
 4. 颜色搭配要协调，可以采用同色系、对比色或经典搭配
 5. 考虑场景的适配性
 
-请只返回JSON数据，不要包含其他文字。"""
+        请只返回JSON数据，不要包含其他文字。"""
 
         try:
-            # 使用Gemini生成推荐
-            response = self.client.models.generate_content(
-                model=Config.GEMINI_MODEL,
-                contents=prompt
-            )
-            
-            result_text = response.text
-            result_text = result_text.strip()
-
-            if result_text.startswith('```'):
-                result_text = result_text.split('\n', 1)[1]
-            if result_text.endswith('```'):
-                result_text = result_text.rsplit('\n', 1)[0]
-
-            result = json.loads(result_text)
+            result_text = self._chat_completion([{"role": "user", "content": prompt}])
+            result = self._extract_json(result_text)
             return result
 
         except Exception as e:
-            logger.exception('推荐生成失败: %s', e)
+            logger.exception("推荐生成失败: %s", e)
             return self._get_default_recommendations(analysis_result)
 
     def _get_default_analysis(self) -> dict:
@@ -199,7 +237,7 @@ class AIService:
             "length": "中长款",
             "suitable_scenes": ["约会", "通勤"],
             "suitable_seasons": ["春", "夏"],
-            "description": "这是一件优雅的粉红色中长款裙子，适合日常穿着。"
+            "description": "这是一件优雅的粉红色中长款裙子，适合日常穿着。",
         }
 
     def _get_default_recommendations(self, analysis: dict) -> dict:
@@ -215,7 +253,7 @@ class AIService:
                     "color": "白色",
                     "reason": "白色衬衫是百搭单品，与粉色裙子形成清新优雅的搭配",
                     "scenes": ["通勤", "约会"],
-                    "tags": ["简约", "百搭"]
+                    "tags": ["简约", "百搭"],
                 },
                 {
                     "type": "鞋子",
@@ -224,7 +262,7 @@ class AIService:
                     "color": "米色",
                     "reason": "米色高跟鞋延伸腿部线条，与粉色裙子搭配显气质",
                     "scenes": ["通勤", "约会", "聚会"],
-                    "tags": ["优雅", "显高"]
+                    "tags": ["优雅", "显高"],
                 },
                 {
                     "type": "包包",
@@ -233,7 +271,7 @@ class AIService:
                     "color": "白色",
                     "reason": "白色链条包简约精致，与整体搭配协调",
                     "scenes": ["约会", "聚会"],
-                    "tags": ["精致", "百搭"]
+                    "tags": ["精致", "百搭"],
                 },
                 {
                     "type": "配饰",
@@ -242,7 +280,7 @@ class AIService:
                     "color": "白色",
                     "reason": "珍珠耳环增添优雅气质，不抢夺服装风采",
                     "scenes": ["通勤", "约会", "聚会"],
-                    "tags": ["优雅", "精致"]
-                }
-            ]
+                    "tags": ["优雅", "精致"],
+                },
+            ],
         }

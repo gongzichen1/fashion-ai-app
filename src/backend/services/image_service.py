@@ -1,13 +1,13 @@
 # services/image_service.py - 图片处理服务
 
-import os
 import base64
-import uuid
 import logging
-from PIL import Image
+import os
+import uuid
+
 from colorthief import ColorThief
 from config.settings import Config
-
+from PIL import Image
 
 logger = logging.getLogger(__name__)
 
@@ -20,8 +20,10 @@ class ImageService:
     @staticmethod
     def allowed_file(filename: str) -> bool:
         """检查文件扩展名是否允许"""
-        return '.' in filename and \
-            filename.rsplit('.', 1)[1].lower() in ImageService.ALLOWED_EXTENSIONS
+        return (
+            "." in filename
+            and filename.rsplit(".", 1)[1].lower() in ImageService.ALLOWED_EXTENSIONS
+        )
 
     @staticmethod
     def save_image(image_data, filename: str = None) -> str:
@@ -46,7 +48,7 @@ class ImageService:
         if isinstance(image_data, str):
             # base64字符串
             image_data = base64.b64decode(image_data)
-            with open(filepath, 'wb') as f:
+            with open(filepath, "wb") as f:
                 f.write(image_data)
         else:
             # 文件对象
@@ -65,8 +67,8 @@ class ImageService:
         Returns:
             base64编码的字符串
         """
-        with open(image_path, 'rb') as f:
-            return base64.b64encode(f.read()).decode('utf-8')
+        with open(image_path, "rb") as f:
+            return base64.b64encode(f.read()).decode("utf-8")
 
     @staticmethod
     def resize_image(image_path: str, max_size: tuple = (800, 800)) -> str:
@@ -104,13 +106,13 @@ class ImageService:
             palette = color_thief.get_palette(color_count=color_count)
             return palette
         except Exception as e:
-            logger.warning('颜色提取失败: %s', e)
+            logger.warning("颜色提取失败: %s", e)
             return [(255, 107, 157)]  # 默认粉色
 
     @staticmethod
     def rgb_to_hex(rgb: tuple) -> str:
         """RGB转十六进制颜色"""
-        return '#{:02x}{:02x}{:02x}'.format(rgb[0], rgb[1], rgb[2])
+        return "#{:02x}{:02x}{:02x}".format(rgb[0], rgb[1], rgb[2])
 
     @staticmethod
     def get_image_info(image_path: str) -> dict:
@@ -125,9 +127,9 @@ class ImageService:
         """
         with Image.open(image_path) as img:
             return {
-                'width': img.width,
-                'height': img.height,
-                'format': img.format,
-                'mode': img.mode,
-                'size_bytes': os.path.getsize(image_path)
+                "width": img.width,
+                "height": img.height,
+                "format": img.format,
+                "mode": img.mode,
+                "size_bytes": os.path.getsize(image_path),
             }

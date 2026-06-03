@@ -30,7 +30,7 @@ REM 检查环境变量
 if not exist ".env" (
     echo.
     echo 警告: 未找到.env文件
-    echo 请复制.env.example为.env并填入Gemini API密钥
+    echo 请复制.env.example为.env并填入大模型接口配置
     echo.
     set /p continue="是否继续启动（无API密钥将使用演示兜底结果）? [y/N]: "
     if /i not "%continue%"=="y" exit /b 1

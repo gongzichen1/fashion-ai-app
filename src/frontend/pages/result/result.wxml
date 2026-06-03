@@ -1,151 +1,143 @@
-<!--pages/result/result.wxml - 结果页模板-->
+<!--pages/result/result.wxml - 搭配推荐结果页-->
 <view class="result-page">
-  <!-- 加载中 -->
   <view class="loading-container" wx:if="{{loading}}">
     <view class="loading-spinner"></view>
-    <text class="loading-text">正在生成搭配推荐...</text>
+    <text class="loading-text">AI正在整理搭配结果</text>
   </view>
 
-  <!-- 内容区域 -->
-  <block wx:if="{{!loading && analysisResult}}">
-    <!-- 分析结果卡片 -->
-    <view class="analysis-card">
-      <view class="card-header">
-        <text class="card-title">服装分析</text>
-        <view class="collect-btn" bindtap="toggleCollect">
-          <image
-            class="collect-icon"
-            src="{{collectStatus ? '/images/icon-collect-active.svg' : '/images/icon-collect.svg'}}"
-          ></image>
-        </view>
+  <block wx:elif="{{analysisResult}}">
+    <view class="top-bar">
+      <view class="back-btn" bindtap="goHome">
+        <text class="back-icon">‹</text>
+        <text>返回</text>
       </view>
+      <text class="page-title">AI分析结果</text>
+      <view class="top-spacer"></view>
+    </view>
 
-      <view class="garment-info">
-        <image
-          class="garment-image"
-          src="{{analysisResult.image}}"
-          mode="aspectFill"
-          bindtap="previewImage"
-          data-url="{{analysisResult.image}}"
-        ></image>
-
-        <view class="garment-details">
-          <view class="detail-row">
-            <text class="detail-label">服装类型</text>
-            <text class="detail-value">{{analysisResult.garmentType}}</text>
-          </view>
-          <view class="detail-row">
-            <text class="detail-label">主色调</text>
-            <view class="color-tag" style="background-color: {{analysisResult.primaryColor}}"></view>
-            <text class="detail-value">{{analysisResult.colorName}}</text>
-          </view>
-          <view class="detail-row">
-            <text class="detail-label">风格定位</text>
-            <view class="style-tags">
-              <text class="tag" wx:for="{{analysisResult.styles}}" wx:key="*this">{{item}}</text>
-            </view>
-          </view>
-          <view class="detail-row">
-            <text class="detail-label">适合场景</text>
-            <view class="scene-tags">
-              <text class="tag" wx:for="{{analysisResult.scenes}}" wx:key="*this">{{item}}</text>
-            </view>
-          </view>
-        </view>
+    <view class="hero-card" bindtap="previewImage" data-url="{{analysisResult.image}}">
+      <image class="hero-image" src="{{analysisResult.image}}" mode="aspectFill"></image>
+      <view class="score-badge">
+        <text class="score-star">✦</text>
+        <text>搭配指数 {{analysisResult.score || 92}}</text>
       </view>
     </view>
 
-    <!-- 场景选择 -->
-    <view class="scene-filter">
-      <scroll-view scroll-x class="scene-scroll">
-        <view
-          class="scene-item {{selectedScene === item.key ? 'active' : ''}}"
-          wx:for="{{scenes}}"
-          wx:key="key"
-          bindtap="switchScene"
-          data-scene="{{item.key}}"
-        >
-          {{item.name}}
+    <view class="analysis-card">
+      <view class="card-title-row">
+        <view class="title-mark">✦</view>
+        <text class="card-title">AI识别结果</text>
+      </view>
+      <view class="attr-grid">
+        <view class="attr-item">
+          <text class="attr-label">服装类型</text>
+          <text class="attr-value">{{analysisResult.garmentType || 'AI分析结果'}}</text>
+        </view>
+        <view class="attr-item">
+          <text class="attr-label">主色调</text>
+          <text class="attr-value">{{analysisResult.colorName || analysisResult.primaryColor || '自然色系'}}</text>
+        </view>
+        <view class="attr-item">
+          <text class="attr-label">服装分类</text>
+          <text class="attr-value">{{analysisResult.category || '日常单品'}}</text>
+        </view>
+        <view class="attr-item">
+          <text class="attr-label">适合场合</text>
+          <text class="attr-value">{{analysisResult.scenesText || '日常 / 通勤'}}</text>
+        </view>
+      </view>
+      <view class="tag-row" wx:if="{{analysisResult.styles && analysisResult.styles.length}}">
+        <text class="style-tag" wx:for="{{analysisResult.styles}}" wx:key="*this">{{item}}</text>
+      </view>
+      <text class="analysis-desc" wx:if="{{analysisResult.description}}">{{analysisResult.description}}</text>
+    </view>
+
+    <view class="color-card">
+      <view class="card-title-row compact">
+        <text class="palette-icon">●</text>
+        <text class="card-title small">色彩分析</text>
+      </view>
+      <view class="palette-row">
+        <view class="color-dot main-color" style="background: {{analysisResult.primaryColor || '#E8DDD0'}};"></view>
+        <view class="color-dot color-a"></view>
+        <view class="color-dot color-b"></view>
+        <view class="color-dot color-c"></view>
+        <view class="color-dot color-d"></view>
+      </view>
+      <text class="palette-name">{{analysisResult.colorName || analysisResult.primaryColor || '柔和中性色'}}</text>
+    </view>
+
+    <view class="scene-section">
+      <text class="section-title">场景搭配</text>
+      <scroll-view class="scene-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+        <view class="scene-list">
+          <view
+            class="scene-pill {{selectedScene === item.key ? 'active' : ''}}"
+            wx:for="{{scenes}}"
+            wx:key="key"
+            bindtap="switchScene"
+            data-scene="{{item.key}}"
+          >
+            {{item.name}}
+          </view>
         </view>
       </scroll-view>
     </view>
 
-    <!-- 搭配推荐列表 -->
-    <view class="recommendations">
+    <view class="recommend-section">
       <view class="section-header">
-        <text class="section-title">搭配推荐</text>
+        <text class="section-title">推荐搭配单品</text>
+        <text class="section-count">{{recommendations.length}} 件</text>
       </view>
 
-      <view class="recommend-list" wx:if="{{recommendations.length > 0}}">
-        <view class="recommend-card" wx:for="{{recommendations}}" wx:key="id">
-          <view class="recommend-header">
-            <text class="recommend-type">{{item.type}}</text>
-            <view class="recommend-tags">
-              <text class="mini-tag" wx:for="{{item.tags}}" wx:for-item="tag" wx:key="*this">{{tag}}</text>
-            </view>
-          </view>
-
-          <image
-            class="recommend-image"
-            src="{{item.image}}"
-            mode="aspectFill"
-            bindtap="previewImage"
-            data-url="{{item.image}}"
-          ></image>
-
-          <view class="recommend-content">
-            <text class="recommend-name">{{item.name}}</text>
-            <text class="recommend-reason">{{item.reason}}</text>
-
-            <view class="recommend-footer">
-              <text class="recommend-price" wx:if="{{item.price}}">{{item.price}}</text>
-              <button
-                class="buy-btn"
-                wx:if="{{item.productUrl}}"
-                bindtap="goToProduct"
-                data-url="{{item.productUrl}}"
-                data-platform="{{item.platform}}"
-              >
-                查看商品
-              </button>
+      <scroll-view class="recommend-scroll" scroll-x enhanced show-scrollbar="{{false}}" wx:if="{{recommendations.length > 0}}">
+        <view class="recommend-list">
+          <view class="recommend-card" wx:for="{{recommendations}}" wx:key="id" bindtap="goToProduct" data-url="{{item.url}}">
+            <image class="recommend-image" src="{{item.image}}" mode="aspectFill"></image>
+            <view class="recommend-content">
+              <text class="recommend-type">{{item.type || item.category || '搭配单品'}}</text>
+              <text class="recommend-name">{{item.name}}</text>
+              <text class="recommend-desc">{{item.description || item.color || '适配当前风格'}}</text>
+              <text class="recommend-price">{{item.price || '查看详情'}}</text>
             </view>
           </view>
         </view>
-      </view>
+      </scroll-view>
 
-      <!-- 空状态 -->
-      <view class="empty-state" wx:if="{{recommendations.length === 0}}">
-        <image class="empty-icon" src="/images/empty.svg"></image>
-        <text class="empty-text">暂无该场景的搭配推荐</text>
+      <view class="empty-recommend" wx:else>
+        <text>当前场景暂无推荐，切换其他场景试试</text>
       </view>
     </view>
 
-    <!-- 穿搭建议 -->
-    <view class="tips-card" wx:if="{{analysisResult.styleTips}}">
-      <view class="section-header">
-        <text class="section-title">穿搭建议</text>
+    <view class="suggestion-card" wx:if="{{analysisResult.styleTips}}">
+      <view class="title-mark">✦</view>
+      <view class="suggestion-content">
+        <text class="suggestion-title">智搭建议</text>
+        <text class="suggestion-text">{{analysisResult.styleTips}}</text>
       </view>
-      <text class="tips-content">{{analysisResult.styleTips}}</text>
     </view>
 
-    <!-- 底部操作栏 -->
-    <view class="bottom-bar">
-      <button class="action-btn share-btn" open-type="share">
-        <image class="btn-icon" src="/images/icon-share.svg"></image>
-        分享
+    <view class="action-grid">
+      <view class="action-item {{collectStatus ? 'active' : ''}}" bindtap="toggleCollect">
+        <image class="action-icon" src="{{collectStatus ? '/images/icon-collect-active.svg' : '/images/icon-collect.svg'}}"></image>
+        <text>{{collectStatus ? '已收藏' : '收藏'}}</text>
+      </view>
+      <button class="action-item share-btn" open-type="share">
+        <image class="action-icon" src="/images/icon-share.svg"></image>
+        <text>分享</text>
       </button>
-      <button class="action-btn save-btn" bindtap="saveImage">
-        <image class="btn-icon" src="/images/icon-save.svg"></image>
-        保存
-      </button>
-      <button class="action-btn retake-btn" bindtap="retake">
-        <image class="btn-icon" src="/images/icon-camera.png"></image>
-        重拍
-      </button>
-      <button class="action-btn home-btn" bindtap="goHome">
-        <image class="btn-icon" src="/images/tab-home.png"></image>
-        首页
-      </button>
+      <view class="action-item" bindtap="saveImage">
+        <image class="action-icon" src="/images/icon-save.svg"></image>
+        <text>保存</text>
+      </view>
+      <view class="action-item" bindtap="retake">
+        <image class="action-icon" src="/images/icon-camera.svg"></image>
+        <text>重新拍</text>
+      </view>
+    </view>
+
+    <view class="home-action" bindtap="goHome">
+      <text>返回首页</text>
     </view>
   </block>
 </view>

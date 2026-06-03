@@ -1,87 +1,119 @@
 <!--pages/index/index.wxml - 首页模板-->
-<view class="container">
-  <!-- 顶部欢迎区域 -->
-  <view class="header">
-    <view class="welcome">
-      <text class="greeting">Hi，欢迎使用智搭</text>
-      <text class="sub-greeting">一键拍照，AI智能搭配推荐</text>
+<view class="home-page">
+  <view class="home-header">
+    <view class="brand-row">
+      <view class="brand-mark">
+        <image class="brand-logo" src="/images/logo.png" mode="aspectFit"></image>
+      </view>
+      <text class="brand-name">智搭</text>
     </view>
-    <image class="logo" src="/images/logo.png" mode="aspectFit"></image>
+    <view class="header-main">
+      <view>
+        <text class="home-title">早安，今天穿什么？</text>
+        <text class="home-subtitle">为你准备了今日专属搭配灵感</text>
+      </view>
+      <view class="notice-dot">
+        <text class="notice-icon">●</text>
+      </view>
+    </view>
   </view>
 
-  <!-- 主操作按钮 -->
-  <view class="main-action" bindtap="goToCamera">
-    <view class="action-content">
-      <image class="camera-icon" src="/images/camera-big.png" mode="aspectFit"></image>
-      <text class="action-title">拍照识衣</text>
-      <text class="action-desc">拍摄服装照片，获取搭配建议</text>
-    </view>
-  </view>
-
-  <!-- 天气穿搭 -->
   <view class="weather-card" bindtap="loadWeather">
-    <view class="weather-main" wx:if="{{weather}}">
-      <view class="weather-info">
-        <text class="weather-title">今日天气</text>
-        <text class="weather-temp">{{weather.temperature}}°C</text>
-        <text class="weather-desc">{{weather.condition}} · {{weather.windText}}</text>
+    <view class="weather-top">
+      <view>
+        <view class="location-row">
+          <text class="location-icon">⌖</text>
+          <text class="location-text">{{weather ? (weather.location || '当前位置') : '点击获取当地天气'}}</text>
+        </view>
+        <view class="weather-body" wx:if="{{weather}}">
+          <text class="weather-temp">{{weather.temperature}}°</text>
+          <view class="weather-meta">
+            <text class="weather-condition">{{weather.condition}}</text>
+            <text class="weather-range">{{weather.windText || '适合外出'}}</text>
+          </view>
+        </view>
+        <view class="weather-empty" wx:else>
+          <text class="weather-temp-placeholder">{{weatherLoading ? '...' : '--°'}}</text>
+          <text class="weather-empty-text">{{weatherError || '开启定位，获取今日天气穿搭'}}</text>
+        </view>
       </view>
-      <view class="weather-advice">
-        <text class="weather-advice-title">穿搭建议</text>
-        <text class="weather-advice-text">{{weather.outfitAdvice}}</text>
+      <view class="weather-symbol">
+        <view class="sun"></view>
+        <view class="cloud cloud-a"></view>
+        <view class="cloud cloud-b"></view>
       </view>
     </view>
-
-    <view class="weather-placeholder" wx:else>
-      <view class="weather-info">
-        <text class="weather-title">今日天气</text>
-        <text class="weather-desc">{{weatherError || '点击获取当地天气与穿搭建议'}}</text>
-      </view>
-      <text class="weather-action">{{weatherLoading ? '获取中...' : '获取天气'}}</text>
+    <view class="weather-stats" wx:if="{{weather}}">
+      <text>风力 {{weather.windText || '舒适'}}</text>
+      <text>湿度 {{weather.humidity || '--'}}%</text>
+    </view>
+    <view class="ai-tip">
+      <text class="spark">✦</text>
+      <text>{{weather ? weather.outfitAdvice : (weatherLoading ? '正在获取天气建议...' : '今天适合先拍一件单品，让 AI 结合天气生成搭配')}}</text>
     </view>
   </view>
 
-  <!-- 功能入口 -->
-  <view class="section">
-    <view class="section-header">
-      <text class="section-title">核心功能</text>
+  <view class="cta-block">
+    <view class="primary-cta" bindtap="goToCamera">
+      <view>
+        <text class="cta-title">拍照识衣</text>
+        <text class="cta-desc">AI智能识别 · 一键生成搭配方案</text>
+      </view>
+      <view class="cta-icon-wrap">
+        <image class="cta-icon" src="/images/camera-big.png" mode="aspectFit"></image>
+      </view>
+      <view class="cta-orb orb-a"></view>
+      <view class="cta-orb orb-b"></view>
     </view>
-    <view class="feature-grid">
-      <view class="feature-item" wx:for="{{features}}" wx:key="title" bindtap="onFeatureTap" data-action="{{item.action}}">
+    <view class="album-cta" bindtap="goToCamera">
+      <image class="album-cta-icon" src="/images/icon-album.svg" mode="aspectFit"></image>
+      <text>从相册上传</text>
+    </view>
+  </view>
+
+  <view class="feature-grid">
+    <view class="feature-item" wx:for="{{features}}" wx:key="title" bindtap="onFeatureTap" data-action="{{item.action}}">
+      <view class="feature-icon-wrap {{item.tone}}">
         <image class="feature-icon" src="{{item.icon}}" mode="aspectFit"></image>
-        <text class="feature-title">{{item.title}}</text>
-        <text class="feature-desc">{{item.desc}}</text>
       </view>
+      <text class="feature-title">{{item.title}}</text>
     </view>
   </view>
 
-  <!-- 最近记录 -->
   <view class="section" wx:if="{{recentHistory.length > 0}}">
     <view class="section-header">
       <text class="section-title">最近分析</text>
-      <text class="section-more" bindtap="goToProfile">查看更多</text>
+      <text class="section-more" bindtap="goToProfile">查看全部 ›</text>
     </view>
-    <scroll-view class="history-scroll" scroll-x>
-      <view class="history-item" wx:for="{{recentHistory}}" wx:key="id" bindtap="goToResult" data-id="{{item.id}}">
-        <image class="history-image" src="{{item.image}}" mode="aspectFill"></image>
-        <text class="history-title">{{item.garmentType}}</text>
+    <scroll-view class="recent-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+      <view class="recent-list">
+        <view class="recent-card" wx:for="{{recentHistory}}" wx:key="id" bindtap="goToResult" data-id="{{item.id}}">
+          <image class="recent-image" src="{{item.image}}" mode="aspectFill"></image>
+          <view class="recent-content">
+            <text class="recent-title">{{item.garmentType || 'AI分析结果'}}</text>
+            <text class="recent-time">{{item.displayTime || '刚刚'}}</text>
+          </view>
+        </view>
       </view>
     </scroll-view>
   </view>
 
-  <!-- 热门风格 -->
   <view class="section">
     <view class="section-header">
-      <text class="section-title">热门穿搭风格</text>
+      <text class="section-title">热门风格</text>
+      <text class="section-more">更多 ›</text>
     </view>
-    <view class="style-list">
-      <view class="style-item" wx:for="{{hotStyles}}" wx:key="id" bindtap="goToStyleDetail" data-id="{{item.id}}">
-        <image class="style-image" src="{{item.image}}" mode="aspectFill"></image>
-        <view class="style-info">
-          <text class="style-name">{{item.name}}</text>
-          <text class="style-count">{{item.count}}</text>
+    <scroll-view class="style-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+      <view class="style-list">
+        <view class="style-card" wx:for="{{hotStyles}}" wx:key="id" bindtap="goToStyleDetail" data-id="{{item.id}}">
+          <image class="style-image" src="{{item.image}}" mode="aspectFill"></image>
+          <view class="style-mask"></view>
+          <view class="style-info">
+            <text class="style-name">{{item.name}}</text>
+            <text class="style-count">{{item.count}}</text>
+          </view>
         </view>
       </view>
-    </view>
+    </scroll-view>
   </view>
 </view>

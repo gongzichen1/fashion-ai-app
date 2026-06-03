@@ -31,7 +31,11 @@ cp .env.example .env
 ```
 
 必填配置：
-- `GEMINI_API_KEY`: Gemini API 密钥。未配置时接口仍可运行，但会返回演示兜底分析结果。
+- `AI_API_URL`: OpenAI 兼容接口地址。可以填 base url，服务会自动追加 `/chat/completions`。
+- `AI_API_KEY`: 大模型 API 密钥。
+- `AI_MODEL`: 模型名称。
+
+未配置时接口仍可运行，但会返回演示兜底分析结果。
 
 ### 4. 启动服务
 

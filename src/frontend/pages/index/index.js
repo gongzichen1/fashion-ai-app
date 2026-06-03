@@ -1,19 +1,15 @@
 // pages/index/index.js - 首页
 const app = getApp();
 const apiHost = app.globalData.apiBaseUrl.replace(/\/api$/, '');
+const { formatRelativeTime } = require('../../utils/util');
 
 Page({
   data: {
-    bannerList: [
-      { id: 1, image: '/images/banner1.png', title: 'AI智能搭配' },
-      { id: 2, image: '/images/banner2.png', title: '一键拍照推荐' },
-      { id: 3, image: '/images/banner3.png', title: '个性化推荐' }
-    ],
     features: [
-      { icon: '/images/icon-camera.png', title: '拍照识别', desc: '拍照即可获得搭配建议', action: 'camera' },
-      { icon: '/images/icon-ai.png', title: 'AI分析', desc: '智能分析服装特征', action: 'camera' },
-      { icon: '/images/icon-match.png', title: '搭配推荐', desc: '查看历史搭配方案', action: 'profile' },
-      { icon: '/images/icon-shop.png', title: '天气穿搭', desc: '根据天气给出建议', action: 'weather' }
+      { icon: '/images/icon-ai.png', title: 'AI识别', action: 'camera', tone: 'rose' },
+      { icon: '/images/icon-match.png', title: '搭配推荐', action: 'profile', tone: 'gold' },
+      { icon: '/images/icon-shop.png', title: '天气穿搭', action: 'weather', tone: 'sage' },
+      { icon: '/images/icon-style.png', title: '智能衣橱', action: 'profile', tone: 'lavender' }
     ],
     hotStyles: [
       { id: 1, name: '优雅通勤风', image: `${apiHost}/static/images/style-1.png`, count: '2.3万人使用' },
@@ -37,7 +33,8 @@ Page({
   loadRecentHistory() {
     const history = app.globalData.uploadHistory.slice(0, 3).map(item => ({
       ...item,
-      image: this.normalizeImageUrl(item.image)
+      image: this.normalizeImageUrl(item.image),
+      displayTime: item.timestamp ? formatRelativeTime(item.timestamp) : ''
     }));
     this.setData({ recentHistory: history });
   },

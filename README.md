@@ -1,11 +1,11 @@
-# 👗 穿搭AI小程序 - 基于Gemini的智能穿搭推荐系统
+# 👗 穿搭AI小程序 - 智能穿搭推荐系统
 
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Flask-3.0+-black.svg)](https://flask.palletsprojects.com/)
-[![Gemini AI](https://img.shields.io/badge/Gemini-AI-orange.svg)](https://ai.google.dev/)
+[![AI](https://img.shields.io/badge/OpenAI--compatible-AI-orange.svg)](#)
 [![微信小程序](https://img.shields.io/badge/微信小程序-1.06.2307260-green.svg)](https://developers.weixin.qq.com/miniprogram/dev/framework/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-> 🚀 一个基于Google Gemini AI的智能穿搭推荐微信小程序，通过AI图像分析为用户提供个性化服装搭配建议
+> 🚀 一个基于大模型视觉分析的智能穿搭推荐微信小程序，通过AI图像分析为用户提供个性化服装搭配建议
 
 ## ✨ 主要功能
 
@@ -15,11 +15,11 @@
 - **🌤 天气穿搭**: 获取当前位置天气并给出当天穿衣建议
 - **👤 个人中心**: 支持历史记录、收藏搭配、衣橱单品、风格偏好、身材信息和反馈
 - **📱 移动端优化**: 专为微信小程序优化的轻量级移动端应用
-- **🤖 Gemini AI集成**: 利用Google Gemini的强大多模态AI能力，实现精准的图像理解和智能文本生成
+- **🤖 大模型集成**: 支持OpenAI兼容多模态接口，实现图像理解和智能文本生成
 
 ### 🔧 技术特色
 - **前后端分离**: Flask后端API + 微信小程序前端
-- **AI驱动**: 集成最新Gemini AI模型，支持复杂图像分析
+- **AI驱动**: 集成OpenAI兼容多模态模型，支持复杂图像分析
 - **响应式设计**: 适配不同屏幕尺寸的移动设备
 - **RESTful API**: 标准化的API设计，易于扩展和维护
 
@@ -27,7 +27,7 @@
 
 ### 后端 (Backend)
 - **框架**: Flask 3.0+
-- **AI引擎**: Google Gemini AI API
+- **AI引擎**: OpenAI兼容多模态大模型 API
 - **图像处理**: Pillow, ColorThief
 - **配置管理**: python-dotenv
 - **跨域支持**: Flask-CORS
@@ -59,7 +59,7 @@
 │   │   │   └── routes.py     # REST API端点
 │   │   ├── services/         # 业务逻辑服务
 │   │   │   ├── __init__.py
-│   │   │   ├── ai_service.py # Gemini AI服务
+│   │   │   ├── ai_service.py # AI服务
 │   │   │   ├── image_service.py # 图像处理服务
 │   │   │   └── prompts.py    # AI提示词配置
 │   │   ├── config/           # 配置管理
@@ -135,8 +135,10 @@ pip install -r requirements.txt
 
 # 配置环境变量
 cp .env.example .env
-# 编辑 .env 文件，填入你的 Gemini API 密钥
-# GEMINI_API_KEY=your_api_key_here
+# 编辑 .env 文件，填入你的大模型接口配置
+# AI_API_URL=https://your-provider.example.com/api
+# AI_API_KEY=your_api_key_here
+# AI_MODEL=your_model_name_here
 
 # 启动开发服务器
 python app.py
@@ -157,9 +159,11 @@ cd src/frontend
 
 #### 环境变量 (.env)
 ```bash
-# Gemini AI 配置
-GEMINI_API_KEY=your_gemini_api_key
-GEMINI_MODEL=gemini-1.5-flash
+# OpenAI兼容大模型配置
+AI_API_URL=https://your-provider.example.com/api
+AI_API_KEY=your_api_key_here
+AI_MODEL=your_model_name_here
+AI_TIMEOUT=60
 
 # Flask 配置
 FLASK_ENV=development
@@ -303,7 +307,7 @@ git commit -m "chore: 更新构建配置"
 
 ## 🙏 致谢
 
-- **Google Gemini AI**: 提供强大的AI图像分析能力
+- **OpenAI 兼容多模态模型**: 提供AI图像分析和搭配推荐能力
 - **微信小程序**: 优秀的移动端开发平台
 - **开源社区**: 感谢所有贡献者和灵感来源
 
