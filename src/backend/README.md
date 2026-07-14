@@ -13,11 +13,11 @@ cp src/backend/.env.example src/backend/.env
 .venv/bin/python src/backend/app.py
 ```
 
-至少配置 `SECRET_KEY`、AI provider 参数。飞书环境配置 `FEISHU_APP_ID`、`FEISHU_APP_SECRET`；微信环境配置 `WECHAT_APP_ID`、`WECHAT_APP_SECRET`。开发登录必须显式设置 `ALLOW_DEV_LOGIN=true`，生产禁止开启。
+至少配置 `SECRET_KEY`、AI provider 参数。飞书环境配置 `FEISHU_APP_ID`、`FEISHU_APP_SECRET`；微信环境配置 `WECHAT_APP_ID`、`WECHAT_APP_SECRET`。开发登录必须显式设置 `FEISHU_DEV_LOGIN_ENABLED=true`，生产禁止开启。
 
 ## 数据与图片
 
-- 默认 `DATABASE_URL=sqlite:///...` 只适合本地或单实例 MVP，生产多实例必须替换为外部正式数据库。
+- 数据层支持 SQLite、MySQL 和 PostgreSQL。默认 `DATABASE_URL=sqlite:///...` 只适合本地；生产使用 `mysql+pymysql://...` 或 `postgresql+psycopg://...` 连接托管数据库，密码中的特殊字符需要 URL 编码。
 - `STORAGE_BACKEND=local` 使用本地目录；设为 `cos` 时必须配置 `COS_SECRET_ID`、`COS_SECRET_KEY`、`COS_REGION`、`COS_BUCKET`。
 - 原始图片默认记录 30 天到期时间；定时执行 `FLASK_APP=src.backend.app flask cleanup-expired-images` 清理未被收藏或衣橱引用的对象。
 

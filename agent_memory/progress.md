@@ -2,7 +2,7 @@
 
 ## Active Task
 
-- 阶段 0 本地代码与报告已完成；下一步是在 CloudBase 与飞书管理后台完成真实环境配置和发布验收。
+- 数据库与登录代码已完成；下一步是在 CloudBase 注入托管数据库/COS 与飞书凭据并完成真实环境发布验收。
 
 ## Success Criteria
 
@@ -14,7 +14,7 @@
 ## Plan
 
 - 创建飞书自建网页应用，配置主页、权限、可信域名和可用范围。
-- 接入外部关系型数据库与真实私有 COS，并配置平台定时清理。
+- 创建托管 MySQL/PostgreSQL 实例，注入 `DATABASE_URL`，接入真实私有 COS 并配置平台定时清理。
 - 部署根目录镜像，验证 health、飞书 JSSDK、AI 与双账号隔离。
 - 进行 5–20 人内部试运行，达到核心链路 95% 后再扩大范围。
 
@@ -26,9 +26,9 @@
 - 完成飞书 React/Vite 移动优先 H5：首页、媒体上传、结果、历史、收藏、衣橱、偏好和个人中心。
 - 完成统一后端认证、用户隔离资源 API、明确 AI 错误、分项 health、local/COS 存储和生命周期清理。
 - 微信小程序已接入后端微信登录与会话 Cookie，保留原核心流程。
-- Python 3.12 干净 `.venv` 下 18 项测试通过；Black、isort、flake8 关键错误检查、compileall、微信 JS 语法和 H5 生产构建通过。
+- Python 3.12 干净 `.venv` 下 21 项测试通过；覆盖飞书重复身份复用、SQLite 旧用户迁移和托管数据库 URL；Black、isort、flake8 关键错误检查、compileall、微信 JS 语法和 H5 生产构建通过。
 - 旧 CloudBase `/` 与 `/api/health` 已恢复快速 200；旧 `/api/analyze` 实测仍返回固定粉色裙子假结果，证明必须重新部署。
 
 ## Next Step
 
-- 准备飞书 App ID/Secret、外部数据库连接和 COS 私有桶配置，部署本轮镜像并按 `docs/FEISHU_ROADMAP.md` 执行双账号/双端验收。
+- 准备飞书 App ID/Secret、托管 MySQL/PostgreSQL 连接串和 COS 私有桶配置，部署本轮镜像并按 `docs/FEISHU_ROADMAP.md` 执行双账号/双端验收。

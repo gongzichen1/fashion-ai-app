@@ -12,9 +12,9 @@
 - `src/frontend`：保留的微信小程序前端，已补 `wx.login` 服务端会话接入，仍需真实 AppID/Secret 真机复验。
 - `src/feishu-web`：新增的飞书自建 H5 前端，支持免登、拍照/相册、分析、历史、收藏、衣橱和偏好。
 - `src/backend`：统一 Flask API，业务数据按用户隔离；AI 未配置或失败时返回明确错误，不再静默伪造结果。
-- 本地默认 SQLite 与本地图片存储只适合单实例 MVP；COS 适配器已实现但尚未使用真实凭据验收，多实例生产发布仍需接入外部数据库。
+- 数据层已支持 SQLite、MySQL 和 PostgreSQL；本地默认 SQLite，生产必须通过 `DATABASE_URL` 连接托管数据库。COS 适配器已实现但尚未使用真实凭据验收。
 
-项目真实能力、缺陷和发布边界以 [项目概况](docs/PROJECT_OVERVIEW.md)、[功能状态](docs/FUNCTION_STATUS.md)、[缺陷清单](docs/DEFECTS.md) 与 [飞书路线](docs/FEISHU_ROADMAP.md) 为准。
+项目真实能力、缺陷和发布边界以 [项目概况](docs/PROJECT_OVERVIEW.md)、[功能状态](docs/FUNCTION_STATUS.md)、[缺陷清单](docs/DEFECTS.md)、[数据库与登录](docs/DATABASE_AND_AUTH.md) 与 [飞书路线](docs/FEISHU_ROADMAP.md) 为准。
 
 ## ✨ 主要功能
 

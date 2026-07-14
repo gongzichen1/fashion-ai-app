@@ -5,7 +5,7 @@
 
 ## 1. 产品定位
 
-智搭是一套以服装图片识别和文字搭配建议为核心的穿搭助手。当前保留微信小程序，并已在本轮把 React/Vite 原型整理为飞书 H5 MVP；服务端仍为两端共用的 Flask API。飞书代码、本地接口和 COS 适配代码已经具备，但真实飞书凭据、管理员发布、移动/桌面端真机、外部数据库和真实 COS 尚未验收，现阶段仍不能称为已上线平台。
+智搭是一套以服装图片识别和文字搭配建议为核心的穿搭助手。当前保留微信小程序，并已在本轮把 React/Vite 原型整理为飞书 H5 MVP；服务端仍为两端共用的 Flask API。飞书代码、MySQL/PostgreSQL 数据层和 COS 适配代码已经具备，但真实飞书凭据、管理员发布、移动/桌面端真机、托管数据库和真实 COS 尚未验收，现阶段仍不能称为已上线平台。
 
 一期产品闭环定义为：
 
@@ -39,7 +39,7 @@
 | 飞书 H5 | `src/feishu-web`，React 18 + Vite + TypeScript | 已实现响应式页面、API 客户端、`requestAccess`/`requestAuthCode`、JSSDK 配置、`chooseMedia`、浏览器文件回退和分享调用；构建结果与真实飞书双端行为仍待最终验证 |
 | API | Flask 3，共用分析、结果、历史、收藏、衣橱、偏好、反馈和身份 API | 已增加飞书 OAuth v2、微信 jscode2session、统一会话、用户归属、分页、幂等删除和 requestId；真实平台凭据、权限及生产安全配置待验收 |
 | AI | OpenAI-compatible `chat/completions`，视觉识别和文字推荐 | 本轮代码已改为生产失败返回 503 和稳定错误码；固定样例只在显式 `AI_DEMO_MODE` 下启用。线上旧版本仍返回固定兜底，必须重新部署后复验 |
-| 结构化存储 | SQLite + JSON payload 兼容层 | 已替代整文件 JSON 并按 owner 建索引；SQLite 适合本地/单实例 MVP，不满足 CloudBase 多实例的正式数据库目标 |
+| 结构化存储 | SQLAlchemy + JSON payload 兼容层 | 支持 SQLite、MySQL、PostgreSQL；按 owner 建索引、飞书外部身份唯一，真实托管实例与备份恢复待验收 |
 | 图片存储 | 对象存储接口 + local/COS adapter | 已按用户 key 保存、鉴权代理读取、记录 30 天到期时间，并提供删除和到期清理 CLI；真实 COS 权限与平台定时调度待验收 |
 | 天气 | 后端调用 Open-Meteo，服务端规则给出建议 | 有参数范围校验和 8 秒超时；依赖外网和定位授权 |
 | 部署 | Flask Dockerfile + CloudBase 历史测试域名 | 仓库有容器文件；当前线上实例、环境变量和真实 AI 链路须重新验证 |
@@ -66,7 +66,7 @@
 - 本轮已重新探测测试域名 `https://zhida-api-264856-5-1259394189.sh.run.tcloudbase.com`：`/` 与 `/api/health` 均返回 200，响应约 0.06–0.10 秒；此前 12 秒超时属于瞬态，当前未复现。该结果只证明现有 Flask 容器可响应，不代表正式数据和飞书链路可用。
 - 本轮将项目 `style-1.png` 上传到线上 `/api/analyze`，约 0.109 秒即返回固定粉色裙子结果，确认线上当前仍在静默使用演示兜底，而非完成真实视觉推理。
 - `src/frontend/config/index.js` 指向 CloudBase 测试 API。正式运营前仍需绑定稳定的 HTTPS 域名，并在微信后台配置合法域名。
-- 本轮代码将 JSON 改为 SQLite，并引入 local/COS 存储 adapter；默认仍是容器本地 SQLite 和上传目录，启用 COS 也不能解决结构化数据的多实例持久化问题。
+- 本轮代码已从 JSON 文件迁移到可配置关系型数据库层，并引入 local/COS 存储 adapter；默认配置仍是本地 SQLite 和上传目录，生产必须同时设置托管数据库和 COS。
 - 飞书应用尚需创建/配置、权限申请、管理员审核、可用范围设置和双端真机验证；这些是仓库外动作，代码不能代替完成。
 
 ## 6. 验证口径

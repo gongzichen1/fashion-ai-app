@@ -230,3 +230,31 @@ def test_wechat_login_error_is_sanitized(tmp_path, monkeypatch):
     assert response.status_code == 401
     assert response.get_json()["error"]["code"] == "WECHAT_LOGIN_FAILED"
     assert "secret detail" not in response.get_data(as_text=True)
+
+
+def test_feishu_login_reuses_identity_and_sets_protected_session(tmp_path, monkeypatch):
+    class FakeFeishuAuth:
+        def exchange_code(self, code):
+            return {
+                "external_id": "feishu:ou_same_user",
+                "provider": "feishu",
+                "open_id": "ou_same_user",
+                "name": f"飞书用户-{code}",
+                "avatar_url": "",
+            }
+
+    store = DataStore(str(tmp_path))
+    monkeypatch.setattr(routes, "db", store)
+    monkeypatch.setattr(routes, "_auth_service", lambda: FakeFeishuAuth())
+    app = create_app("testing")
+    client = app.test_client()
+
+    first = client.post("/api/auth/feishu/login", json={"code": "first"})
+    first_id = first.get_json()["data"]["id"]
+    second = client.post("/api/auth/feishu/login", json={"code": "second"})
+
+    assert second.get_json()["data"]["id"] == first_id
+    assert len(store.scan("users")) == 1
+    cookie = second.headers["Set-Cookie"]
+    assert "HttpOnly" in cookie
+    assert "SameSite=Lax" in cookie

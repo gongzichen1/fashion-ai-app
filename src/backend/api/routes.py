@@ -20,6 +20,7 @@ from services.auth_service import (
     WechatAuthService,
 )
 from services.object_storage import create_object_storage
+from sqlalchemy.exc import IntegrityError
 
 api_bp = Blueprint("api", __name__)
 ai_service = AIService()
@@ -70,7 +71,15 @@ def _upsert_user(identity):
         db.update_one("users", {"id": user["id"]}, identity)
         return db.find_one("users", {"id": user["id"]})
     user = dict(identity)
-    user_id = db.insert("users", user)
+    try:
+        user_id = db.insert("users", user)
+    except IntegrityError:
+        # 唯一索引处理并发免登：另一个请求先创建时复用同一账号。
+        user = db.find_one("users", {"external_id": identity["external_id"]})
+        if not user:
+            raise
+        db.update_one("users", {"id": user["id"]}, identity)
+        return db.find_one("users", {"id": user["id"]})
     return db.find_one("users", {"id": user_id})
 
 
@@ -169,7 +178,7 @@ def jsapi_config():
 @api_bp.get("/health")
 def health_check():
     components = {
-        "database": {"status": "ok" if db.ping() else "error", "backend": "sqlite"},
+        "database": {"status": "ok" if db.ping() else "error", "backend": db.backend},
         "storage": create_object_storage(current_app.config).health(),
         "ai": {
             "status": (
