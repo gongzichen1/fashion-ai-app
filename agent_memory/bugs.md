@@ -23,6 +23,7 @@
 - 本机 `pip-audit` 在创建隔离临时 venv 时触发 macOS `SIGABRT`；不是依赖漏洞结论，安全审计必须以 GitHub Actions 的干净 Python 3.11 结果为准。
 - 本轮无法执行 Docker 镜像构建，因为当前环境未安装 Docker CLI；需由 CI/CloudBase 构建或安装 Docker 后复验。
 - 2026-07-14 再次探测旧 CloudBase `/api/health` 时 15 秒无响应；外部实例状态不稳定，不能作为本轮新版本的部署证据。
+- 随后旧 CloudBase health 恢复 200，但只返回旧版简单状态，新增 `/api/live` 为 404；确认线上尚未部署本分支，间歇性可达不改变发布阻塞结论。
 - 部署验证曾要求 health 的 `ready` 布尔字段，但接口未返回该字段，导致正常部署也会被误判失败；已修复接口契约并新增回归测试。
 - 首次远端 CI 的 28 项后端测试和 PostgreSQL 集成测试通过；随后因 `isort` first-party 分类随环境漂移、MySQL 8.4 `caching_sha2_password` 缺少 `cryptography` 而失败。两项均已修复，第二次 CI 的 verify、PostgreSQL/MySQL 和 Docker 构建全部通过。
 

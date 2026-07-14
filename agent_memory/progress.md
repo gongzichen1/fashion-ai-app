@@ -2,7 +2,7 @@
 
 ## Active Task
 
-- **外部阻塞：**数据库、登录、COS adapter、同源镜像和验收工具已完成；GitHub Secret/production environment 均为空，本地仅有 SQLite 且无 COS、飞书、真实 AI 或 CloudBase CLI，无法执行真实部署和双账号双端验收。
+- **外部阻塞（三轮复核）：**数据库、登录、COS adapter、同源镜像、readiness/preflight 和验收工具已完成；GitHub Secret/production environment 均为空，本地无 COS、飞书、真实 AI、托管数据库或 CloudBase CLI，无法执行真实部署和双账号双端验收。
 
 ## Success Criteria
 
@@ -35,6 +35,7 @@
 - 建立公共服装目录：`catalog_items` 内容哈希唯一索引、审核状态/品类索引、私有图片接口、推荐配图匹配、去重盘点与清单导入；旧上传目录 45 张得到 18 个唯一内容、6 个测试资产和 12 个待授权候选，自动批准 0 张。
 - 修复部署验证与真实 health 的 `ready` 字段契约不一致；新增 liveness/readiness、数据库结构检查、数据库/COS 写入 preflight，CloudBase 部署先执行 CLI dry-run。
 - COS 模式改为仅在系统临时目录处理上传，成功、AI 失败或业务写入失败后均删除容器临时原图。
+- 最新提交 `b63b13b` 的 GitHub Actions 全部通过；生产 deploy 按条件跳过。阻塞审计再次确认 GitHub Secrets=0、production environments=0、本地生产变量=0。
 - 旧 CloudBase `/` 与 `/api/health` 已恢复快速 200；旧 `/api/analyze` 实测仍返回固定粉色裙子假结果，证明必须重新部署。
 
 ## Next Step
