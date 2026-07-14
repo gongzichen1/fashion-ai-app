@@ -6,7 +6,7 @@ type FeishuCallback<T = Record<string, unknown>> = {
 };
 
 interface FeishuTT {
-  requestAccess?: (options: FeishuCallback<{ code: string }> & { appID: string; scopeList: string[] }) => void;
+  requestAccess?: (options: FeishuCallback<{ code: string; state?: string }> & { appID: string; scopeList: string[]; state: string }) => void;
   requestAuthCode?: (options: FeishuCallback<{ code: string }> & { appId: string }) => void;
   chooseMedia?: (
     options: FeishuCallback<{ tempFiles: Array<{ tempFilePath: string; type: string; size?: number }> }> & {
@@ -19,6 +19,9 @@ interface FeishuTT {
     },
   ) => void;
   shareWebContent?: (options: FeishuCallback & { title: string; content: string; url: string; image?: string }) => void;
+  getFileSystemManager?: () => {
+    readFile: (options: FeishuCallback<{ data: ArrayBuffer | Uint8Array }> & { filePath: string }) => void;
+  };
 }
 
 interface FeishuH5SDK {

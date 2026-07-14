@@ -55,7 +55,7 @@ class Config:
     FEISHU_APP_ID = os.getenv("FEISHU_APP_ID", "")
     FEISHU_APP_SECRET = os.getenv("FEISHU_APP_SECRET", "")
     FEISHU_API_BASE = os.getenv("FEISHU_API_BASE", "https://open.feishu.cn/open-apis")
-    FEISHU_JSAPI_TICKET = os.getenv("FEISHU_JSAPI_TICKET", "")
+    FEISHU_WEB_ORIGINS = os.getenv("FEISHU_WEB_ORIGINS", "")
     FEISHU_DEV_LOGIN_ENABLED = (
         os.getenv("FEISHU_DEV_LOGIN_ENABLED", "False").lower() == "true"
     )

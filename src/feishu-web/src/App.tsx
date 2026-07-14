@@ -53,7 +53,8 @@ function LoginScreen({ onLoggedIn }: { onLoggedIn: (user: User) => void }) {
   const login = async () => {
     setLoading(true); setError("");
     try {
-      const user = insideFeishu ? await api.loginWithFeishu(await requestLoginCode()) : await api.devLogin();
+      const loginCode = insideFeishu ? await requestLoginCode() : null;
+      const user = loginCode ? await api.loginWithFeishu(loginCode.code, loginCode.state) : await api.devLogin();
       onLoggedIn(user);
     } catch (reason) { setError(errorText(reason)); } finally { setLoading(false); }
   };

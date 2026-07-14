@@ -4,7 +4,11 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "backend"))
 
 from services import auth_service
-from services.auth_service import FeishuAuthService, WechatAuthService
+from services.auth_service import (
+    FeishuAuthService,
+    FeishuJsapiService,
+    WechatAuthService,
+)
 
 
 class FakeResponse:
@@ -78,3 +82,38 @@ def test_wechat_uses_jscode2session(monkeypatch):
         "grant_type": "authorization_code",
     }
     assert identity["external_id"] == "wechat:wx-open-id"
+
+
+def test_feishu_jsapi_ticket_is_fetched_and_cached(monkeypatch):
+    calls = []
+    clock = [1000]
+
+    def fake_post(url, json, timeout, headers=None):
+        calls.append((url, json, headers))
+        if url.endswith("/auth/v3/tenant_access_token/internal"):
+            return FakeResponse(
+                {"code": 0, "tenant_access_token": "tenant-token", "expire": 7200}
+            )
+        return FakeResponse(
+            {"code": 0, "data": {"ticket": "jsapi-ticket", "expire_in": 7200}}
+        )
+
+    FeishuJsapiService.clear_cache()
+    monkeypatch.setattr(auth_service.requests, "post", fake_post)
+    service = FeishuJsapiService(
+        "app-id",
+        "app-secret",
+        "https://open.feishu.cn/open-apis",
+        now=lambda: clock[0],
+    )
+
+    assert service.ticket() == "jsapi-ticket"
+    assert service.ticket() == "jsapi-ticket"
+    assert len(calls) == 2
+    assert calls[0][0].endswith("/auth/v3/tenant_access_token/internal")
+    assert calls[1][0].endswith("/jssdk/ticket/get")
+    assert calls[1][2]["Authorization"] == "Bearer tenant-token"
+
+    clock[0] += 7000
+    assert service.ticket() == "jsapi-ticket"
+    assert len(calls) == 4

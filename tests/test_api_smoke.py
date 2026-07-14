@@ -249,12 +249,67 @@ def test_feishu_login_reuses_identity_and_sets_protected_session(tmp_path, monke
     app = create_app("testing")
     client = app.test_client()
 
-    first = client.post("/api/auth/feishu/login", json={"code": "first"})
+    first_state = client.post("/api/auth/feishu/challenge").get_json()["data"]["state"]
+    first = client.post(
+        "/api/auth/feishu/login", json={"code": "first", "state": first_state}
+    )
     first_id = first.get_json()["data"]["id"]
-    second = client.post("/api/auth/feishu/login", json={"code": "second"})
+    second_state = client.post("/api/auth/feishu/challenge").get_json()["data"]["state"]
+    second = client.post(
+        "/api/auth/feishu/login", json={"code": "second", "state": second_state}
+    )
 
     assert second.get_json()["data"]["id"] == first_id
     assert len(store.scan("users")) == 1
     cookie = second.headers["Set-Cookie"]
     assert "HttpOnly" in cookie
     assert "SameSite=Lax" in cookie
+
+    replay = client.post(
+        "/api/auth/feishu/login", json={"code": "replay", "state": second_state}
+    )
+    assert replay.status_code == 400
+    assert replay.get_json()["error"]["code"] == "AUTH_STATE_INVALID"
+
+
+def test_feishu_login_rejects_missing_state_before_provider_call(tmp_path, monkeypatch):
+    class UnexpectedFeishuAuth:
+        def exchange_code(self, code):
+            raise AssertionError("invalid state must not call Feishu")
+
+    monkeypatch.setattr(routes, "db", DataStore(str(tmp_path)))
+    monkeypatch.setattr(routes, "_auth_service", lambda: UnexpectedFeishuAuth())
+    app = create_app("testing")
+    response = app.test_client().post(
+        "/api/auth/feishu/login", json={"code": "code-without-state"}
+    )
+    assert response.status_code == 400
+    assert response.get_json()["error"]["code"] == "AUTH_STATE_INVALID"
+
+
+def test_jsapi_config_uses_dynamic_ticket_and_restricts_origin(tmp_path, monkeypatch):
+    class FakeJsapiService:
+        def ticket(self):
+            return "dynamic-ticket"
+
+    client = make_client(tmp_path, monkeypatch)
+    monkeypatch.setattr(routes, "_jsapi_service", lambda: FakeJsapiService())
+    client.application.config["FEISHU_APP_ID"] = "cli_test"
+    client.application.config["FEISHU_WEB_ORIGINS"] = "https://fashion.example.com"
+
+    response = client.get(
+        "/api/auth/feishu/jsapi-config",
+        query_string={"url": "https://fashion.example.com/app?from=workbench"},
+    )
+    assert response.status_code == 200
+    data = response.get_json()["data"]
+    assert data["appId"] == "cli_test"
+    assert "tt.chooseMedia" in data["jsApiList"]
+    assert data["signature"]
+
+    rejected = client.get(
+        "/api/auth/feishu/jsapi-config",
+        query_string={"url": "https://attacker.example.net/app"},
+    )
+    assert rejected.status_code == 400
+    assert rejected.get_json()["error"]["code"] == "JSAPI_URL_INVALID"

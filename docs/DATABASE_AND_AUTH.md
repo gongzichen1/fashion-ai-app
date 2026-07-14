@@ -4,7 +4,7 @@
 
 一期不建立用户名/密码体系，直接使用飞书企业身份免登：
 
-`飞书 requestAccess/requestAuthCode → POST /api/auth/feishu/login → 后端向飞书换取用户身份 → users 映射 → Secure/HttpOnly/SameSite 会话 Cookie`
+`后端生成一次性 state → 飞书 requestAccess/requestAuthCode → POST /api/auth/feishu/login → 校验 state → 后端向飞书换取用户身份 → users 映射 → Secure/HttpOnly/SameSite 会话 Cookie`
 
 - 飞书 `open_id` 会映射为唯一 `external_id=feishu:<open_id>`；同一账号重复或并发登录复用同一内部用户。
 - 前端不能读取会话 Cookie，业务 API 从服务端会话取得当前用户。

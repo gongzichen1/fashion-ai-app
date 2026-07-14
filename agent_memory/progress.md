@@ -26,9 +26,10 @@
 - 完成飞书 React/Vite 移动优先 H5：首页、媒体上传、结果、历史、收藏、衣橱、偏好和个人中心。
 - 完成统一后端认证、用户隔离资源 API、明确 AI 错误、分项 health、local/COS 存储和生命周期清理。
 - 微信小程序已接入后端微信登录与会话 Cookie，保留原核心流程。
-- Python 3.12 干净 `.venv` 下 21 项测试通过；覆盖飞书重复身份复用、SQLite 旧用户迁移和托管数据库 URL；Black、isort、flake8 关键错误检查、compileall、微信 JS 语法和 H5 生产构建通过。
+- Python 3.12 干净 `.venv` 下 24 项测试通过；覆盖飞书一次性 state、动态 ticket 缓存、来源限制、重复身份复用、SQLite 旧用户迁移和托管数据库 URL；飞书 H5 的 `ttfile` 文件系统转换 2 项测试和生产构建通过。
+- 已用 `FileSystemManager.readFile` 替代对 `ttfile://` 的直接 fetch，并在媒体选择和分享前强制完成 JSSDK 鉴权。
 - 旧 CloudBase `/` 与 `/api/health` 已恢复快速 200；旧 `/api/analyze` 实测仍返回固定粉色裙子假结果，证明必须重新部署。
 
 ## Next Step
 
-- 准备飞书 App ID/Secret、托管 MySQL/PostgreSQL 连接串和 COS 私有桶配置，部署本轮镜像并按 `docs/FEISHU_ROADMAP.md` 执行双账号/双端验收。
+- 准备飞书 App ID/Secret、H5 可信域名、托管 MySQL/PostgreSQL 连接串和 COS 私有桶配置，部署本轮镜像并按 `docs/FEISHU_ROADMAP.md` 执行双账号/双端验收。

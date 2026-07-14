@@ -3,10 +3,12 @@
 import hashlib
 import json
 import os
+import secrets
 import time
 import uuid
 from datetime import datetime
 from functools import wraps
+from urllib.parse import urlparse
 
 import requests
 from flask import Blueprint, current_app, jsonify, request, session
@@ -16,6 +18,7 @@ from services.ai_service import AIServiceError
 from services.auth_service import (
     FeishuAuthError,
     FeishuAuthService,
+    FeishuJsapiService,
     WechatAuthError,
     WechatAuthService,
 )
@@ -57,6 +60,31 @@ def _auth_service():
     )
 
 
+def _jsapi_service():
+    return FeishuJsapiService(
+        current_app.config.get("FEISHU_APP_ID"),
+        current_app.config.get("FEISHU_APP_SECRET"),
+        current_app.config.get("FEISHU_API_BASE"),
+    )
+
+
+def _valid_jsapi_url(value):
+    try:
+        parsed = urlparse(value)
+    except ValueError:
+        return False
+    if parsed.scheme not in {"https", "http"} or not parsed.netloc or parsed.fragment:
+        return False
+    allowed = {
+        item.strip().rstrip("/")
+        for item in current_app.config.get("FEISHU_WEB_ORIGINS", "").split(",")
+        if item.strip()
+    }
+    if not allowed:
+        allowed = {request.host_url.rstrip("/")}
+    return f"{parsed.scheme}://{parsed.netloc}" in allowed
+
+
 def _wechat_auth_service():
     return WechatAuthService(
         current_app.config.get("WECHAT_APP_ID"),
@@ -85,9 +113,20 @@ def _upsert_user(identity):
 
 @api_bp.post("/auth/feishu/login")
 def feishu_login():
-    code = (request.get_json(silent=True) or {}).get("code", "").strip()
+    body = request.get_json(silent=True) or {}
+    code = body.get("code", "").strip()
+    state = body.get("state", "").strip()
     if not code:
         return _error("缺少飞书授权码", 400, "AUTH_CODE_REQUIRED")
+    expected_state = session.pop("feishu_login_state", None)
+    expires_at = session.pop("feishu_login_state_expires_at", 0)
+    if (
+        not state
+        or not expected_state
+        or expires_at < time.time()
+        or not secrets.compare_digest(state, expected_state)
+    ):
+        return _error("登录状态已失效，请重新进入应用", 400, "AUTH_STATE_INVALID")
     try:
         user = _upsert_user(_auth_service().exchange_code(code))
     except (FeishuAuthError, requests.RequestException) as exc:
@@ -97,6 +136,14 @@ def feishu_login():
     session["user_id"] = user["id"]
     session.permanent = True
     return jsonify({"success": True, "data": _public_user(user)})
+
+
+@api_bp.post("/auth/feishu/challenge")
+def feishu_login_challenge():
+    state = secrets.token_urlsafe(32)
+    session["feishu_login_state"] = state
+    session["feishu_login_state_expires_at"] = int(time.time()) + 300
+    return jsonify({"success": True, "data": {"state": state, "expiresIn": 300}})
 
 
 @api_bp.post("/auth/dev-login")
@@ -155,10 +202,14 @@ def logout():
 @login_required
 def jsapi_config():
     url = request.args.get("url", "")
-    ticket = current_app.config.get("FEISHU_JSAPI_TICKET", "")
-    if not url or not ticket:
-        return jsonify({"success": True, "data": {"enabled": False}})
-    nonce, timestamp = uuid.uuid4().hex, int(time.time())
+    if not _valid_jsapi_url(url):
+        return _error("JSSDK 页面地址不在允许范围内", 400, "JSAPI_URL_INVALID")
+    try:
+        ticket = _jsapi_service().ticket()
+    except (FeishuAuthError, requests.RequestException) as exc:
+        current_app.logger.warning("飞书 JSSDK 凭证获取失败: %s", exc)
+        return _error("飞书客户端能力暂时不可用", 503, "JSAPI_TICKET_FAILED")
+    nonce, timestamp = uuid.uuid4().hex, int(time.time() * 1000)
     raw = f"jsapi_ticket={ticket}&noncestr={nonce}&timestamp={timestamp}&url={url}"
     signature = hashlib.sha1(raw.encode()).hexdigest()
     return jsonify(
@@ -170,6 +221,11 @@ def jsapi_config():
                 "nonceStr": nonce,
                 "timestamp": timestamp,
                 "signature": signature,
+                "jsApiList": [
+                    "tt.chooseMedia",
+                    "tt.getFileSystemManager",
+                    "tt.shareWebContent",
+                ],
             },
         }
     )
