@@ -2,7 +2,7 @@
 
 ## Active Task
 
-- 数据库与登录代码已完成；下一步是在 CloudBase 注入托管数据库/COS 与飞书凭据并完成真实环境发布验收。
+- **外部阻塞：**数据库、登录、COS adapter、同源镜像和验收工具已完成；GitHub Secret/production environment 均为空，本地仅有 SQLite 且无 COS、飞书、真实 AI 或 CloudBase CLI，无法执行真实部署和双账号双端验收。
 
 ## Success Criteria
 
@@ -36,4 +36,4 @@
 
 ## Next Step
 
-- 在 GitHub/CloudBase 配置部署凭据与生产环境；当前仓库 Actions Secret 和 production environment 均为空。随后准备飞书 App ID/Secret、H5 可信域名、托管数据库连接串和 COS 私有桶，部署本轮镜像并执行双账号/双端验收。
+- 应用所有者先创建托管 MySQL/PostgreSQL、私有 COS 和飞书自建网页应用，在 CloudBase 注入生产环境变量，并在 GitHub 配置 `TCB_SECRET_ID`、`TCB_SECRET_KEY`、`TCB_ENV_ID`、`TCB_SERVICE_NAME`、`PRODUCTION_BASE_URL`。恢复任务后执行部署，再用移动端和桌面端各两个真实飞书会话运行双账号验收；通过前不进入机器人/卡片/天气提醒阶段。
