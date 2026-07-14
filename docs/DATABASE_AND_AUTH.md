@@ -19,7 +19,7 @@
 - 腾讯云 MySQL：`mysql+pymysql://user:password@host:3306/fashion_ai?charset=utf8mb4`
 - PostgreSQL：`postgresql+psycopg://user:password@host:5432/fashion_ai`
 
-核心数据集为 `users`、`results`、`recommendations`、`favorites`、`wardrobe_items`、`user_profiles`、`feedback`。业务表建立 owner 索引，`users.external_id` 建立唯一索引。
+核心数据集为 `users`、`results`、`recommendations`、`favorites`、`wardrobe_items`、`user_profiles`、`feedback` 和独立公共目录 `catalog_items`。用户业务表建立 owner 索引，`users.external_id` 建立唯一索引；公共目录按内容哈希去重，并按审核状态、品类建立索引。
 
 生产连接串只通过 CloudBase 密钥环境变量 `DATABASE_URL` 注入。数据库密码含 `@`、`:`、`/` 等字符时必须 URL 编码，不得提交 `.env`、截图或连接串。
 

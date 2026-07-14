@@ -15,6 +15,7 @@
 - 本机没有可用 Docker 命令；根目录镜像已由 GitHub Actions 成功构建，但仍未使用生产配置启动并执行部署后验收。
 - GitHub 仓库当前没有任何 Actions Secret 或 production environment；无法触发 CloudBase 生产部署。
 - 真实模型视觉兼容性、延迟与错误率仍未在新部署环境验收。
+- 旧上传目录包含真人图、AI 生成图、重复图和测试资产，来源授权未知；公共目录硬性保持待审核，不能因技术盘点通过而对用户发布。
 
 ## Failed Attempts
 

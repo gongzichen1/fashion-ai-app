@@ -181,6 +181,60 @@ def test_last_reference_removal_deletes_orphaned_image(tmp_path, monkeypatch):
     assert not image_path.exists()
 
 
+def test_approved_catalog_is_global_but_pending_assets_stay_hidden(
+    tmp_path, monkeypatch
+):
+    client = make_client(tmp_path, monkeypatch)
+    catalog_dir = tmp_path / "uploads" / "catalog" / "original"
+    catalog_dir.mkdir(parents=True)
+    (catalog_dir / "approved.png").write_bytes(one_pixel_png())
+    routes.db.insert(
+        "catalog_items",
+        {
+            "id": "catalog-approved",
+            "content_hash": "a" * 64,
+            "review_status": "approved",
+            "category": "下装",
+            "garment_type": "直筒裤",
+            "imageKey": "catalog/original/approved.png",
+            "source": "legacy_uploads",
+            "originalFilename": "private-original.png",
+            "scenes": ["日常"],
+        },
+    )
+    routes.db.insert(
+        "catalog_items",
+        {
+            "id": "catalog-pending",
+            "content_hash": "b" * 64,
+            "review_status": "pending_rights_review",
+            "category": "下装",
+            "imageKey": "catalog/original/pending.png",
+        },
+    )
+
+    listing = client.get("/api/catalog").get_json()["data"]
+    assert [item["id"] for item in listing] == ["catalog-approved"]
+    assert "imageKey" not in listing[0]
+    assert "content_hash" not in listing[0]
+    assert "source" not in listing[0]
+    assert "originalFilename" not in listing[0]
+    assert listing[0]["image_url"] == "/api/catalog/catalog-approved/image"
+    assert client.get(listing[0]["image_url"]).status_code == 200
+    assert client.get("/api/catalog/catalog-pending").status_code == 404
+    assert client.get("/api/catalog/catalog-pending/image").status_code == 404
+
+    recommendation = client.post(
+        "/api/recommend",
+        json={"analysisResult": {"category": "上装"}},
+    ).get_json()["data"]["recommendations"][0]
+    assert recommendation["catalogItemId"] == "catalog-approved"
+    assert recommendation["image"] == "/api/catalog/catalog-approved/image"
+
+    client.post("/api/auth/logout")
+    assert client.get("/api/catalog").status_code == 401
+
+
 def test_analyze_reports_ai_failure_instead_of_fake_success(tmp_path, monkeypatch):
     class FailingAIService:
         def analyze_image(self, image_base64, style_preference=None):

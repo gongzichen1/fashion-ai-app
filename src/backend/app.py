@@ -1,5 +1,6 @@
 # app.py - Flask主应用
 
+import json
 import os
 import secrets
 
@@ -16,6 +17,7 @@ from api import api_bp
 # 导入配置和路由
 from config import Config, config
 from models.data_store import db
+from services.catalog_service import import_catalog_directory
 from services.lifecycle_service import cleanup_expired_images
 from services.object_storage import create_object_storage
 
@@ -105,6 +107,47 @@ def create_app(config_name="default"):
         click.echo(
             "scanned={scanned} deleted={deleted} retained={retained} failed={failed}".format(
                 **stats
+            )
+        )
+
+    @app.cli.command("catalog-import")
+    @click.argument("source_dir", type=click.Path(exists=True, file_okay=False))
+    @click.option(
+        "--review-status",
+        type=click.Choice(["pending_rights_review", "approved"]),
+        default="pending_rights_review",
+        show_default=True,
+    )
+    @click.option("--source", default="legacy_uploads", show_default=True)
+    @click.option(
+        "--manifest",
+        type=click.Path(exists=True, dir_okay=False),
+        help="人工补充授权和服装标签后的 inventory JSON",
+    )
+    @click.option("--confirm-approved-rights", is_flag=True)
+    def catalog_import_command(
+        source_dir, review_status, source, manifest, confirm_approved_rights
+    ):
+        """去重导入公共服装目录；默认保持待授权审核、在线不可见。"""
+        metadata_by_hash = {}
+        if manifest:
+            with open(manifest, encoding="utf-8") as source_file:
+                payload = json.load(source_file)
+            metadata_by_hash = {
+                item["content_hash"]: item for item in payload.get("items", [])
+            }
+        result = import_catalog_directory(
+            db,
+            create_object_storage(app.config),
+            source_dir,
+            review_status=review_status,
+            source=source,
+            rights_confirmed=confirm_approved_rights,
+            metadata_by_hash=metadata_by_hash,
+        )
+        click.echo(
+            "created={created} existing={existing} rejected={rejected} failed={failed}".format(
+                **result
             )
         )
 

@@ -25,6 +25,7 @@
 - 飞书免登使用 5 分钟一次性 state；JSSDK ticket 由后端动态获取并按有效期缓存，只为 `FEISHU_WEB_ORIGINS` 签名。
 - 原图默认保留 30 天；收藏或衣橱引用可转为长期资产。
 - AI 失败不再静默返回假结果；仅显式开发配置可启用 demo mode。
+- 公共服装目录 `catalog_items` 与用户 `wardrobe_items` 完全分离；只有完成授权和核心标签复核的 `approved` 目录图片才能通过登录鉴权接口进入推荐配图。
 
 ## Useful Commands
 

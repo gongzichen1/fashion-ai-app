@@ -14,13 +14,14 @@
 - `src/backend`：统一 Flask API，业务数据按用户隔离；AI 未配置或失败时返回明确错误，不再静默伪造结果。
 - 数据层已支持 SQLite、MySQL 和 PostgreSQL；本地默认 SQLite，生产必须通过 `DATABASE_URL` 连接托管数据库。COS 适配器已实现但尚未使用真实凭据验收。
 
-项目真实能力、缺陷和发布边界以 [项目概况](docs/PROJECT_OVERVIEW.md)、[功能状态](docs/FUNCTION_STATUS.md)、[缺陷清单](docs/DEFECTS.md)、[数据库与登录](docs/DATABASE_AND_AUTH.md) 与 [飞书路线](docs/FEISHU_ROADMAP.md) 为准。
+项目真实能力、缺陷和发布边界以 [项目概况](docs/PROJECT_OVERVIEW.md)、[功能状态](docs/FUNCTION_STATUS.md)、[缺陷清单](docs/DEFECTS.md)、[数据库与登录](docs/DATABASE_AND_AUTH.md)、[公共服装目录](docs/CLOTHING_CATALOG.md) 与 [飞书路线](docs/FEISHU_ROADMAP.md) 为准。
 
 ## ✨ 主要功能
 
 ### 🎨 核心功能
 - **📸 智能图像分析**: 拍照或上传服装图片，AI自动识别服装类型、颜色、风格、材质等
 - **🎯 个性化推荐**: 根据用户选择的风格偏好（优雅通勤风、甜美约会风、休闲日常风）提供定制化搭配建议
+- **🗂 公共服装目录**: 对已授权素材进行去重、审核、结构化标注和鉴权配图，与用户私人衣橱隔离
 - **🌤 天气穿搭**: 获取当前位置天气并给出当天穿衣建议
 - **👤 个人中心**: 支持历史记录、收藏搭配、衣橱单品、风格偏好、身材信息和反馈
 - **📱 移动端优化**: 专为微信小程序优化的轻量级移动端应用

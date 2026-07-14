@@ -65,6 +65,26 @@ def test_managed_database_crud_identity_and_owner_isolation(
             == "更新后的上衣"
         )
         assert store.delete_one("results", {"id": result_id, "owner_user_id": user_id})
+        content_hash = "c" * 64
+        catalog_id = store.insert(
+            "catalog_items",
+            {
+                "content_hash": content_hash,
+                "review_status": "approved",
+                "category": "下装",
+                "garment_type": "直筒裤",
+            },
+        )
+        approved = store.find_many(
+            "catalog_items",
+            {"review_status": "approved", "category": "下装"},
+        )
+        assert [item["id"] for item in approved] == [catalog_id]
+        with pytest.raises(IntegrityError):
+            store.insert(
+                "catalog_items",
+                {"content_hash": content_hash, "review_status": "approved"},
+            )
         assert store.backend == expected_backend
         assert store.ping() is True
     finally:

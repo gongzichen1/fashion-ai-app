@@ -22,6 +22,7 @@ from sqlalchemy.engine import make_url
 from config import Config
 
 COLLECTIONS = {
+    "catalog_items",
     "users",
     "results",
     "recommendations",
@@ -29,6 +30,16 @@ COLLECTIONS = {
     "wardrobe_items",
     "user_profiles",
     "feedback",
+}
+
+INDEXED_FIELDS = {
+    "users": {"external_id"},
+    "catalog_items": {
+        "content_hash",
+        "review_status",
+        "category",
+        "garment_type",
+    },
 }
 
 
@@ -78,6 +89,15 @@ class DataStore:
             ]
             if collection == "users":
                 columns.append(Column("external_id", String(191), nullable=True))
+            if collection == "catalog_items":
+                columns.extend(
+                    [
+                        Column("content_hash", String(64), nullable=True),
+                        Column("review_status", String(32), nullable=True),
+                        Column("category", String(64), nullable=True),
+                        Column("garment_type", String(64), nullable=True),
+                    ]
+                )
             columns.extend(
                 [
                     Column("payload", Text, nullable=False),
@@ -89,6 +109,14 @@ class DataStore:
             Index(f"idx_{collection}_owner", table.c.owner_user_id, table.c.created_at)
             if collection == "users":
                 Index("idx_users_external_id", table.c.external_id, unique=True)
+            if collection == "catalog_items":
+                Index("idx_catalog_content_hash", table.c.content_hash, unique=True)
+                Index(
+                    "idx_catalog_review_category",
+                    table.c.review_status,
+                    table.c.category,
+                    table.c.created_at,
+                )
             self.tables[collection] = table
 
     def _initialize(self):
@@ -123,7 +151,7 @@ class DataStore:
         return self.tables[collection]
 
     @staticmethod
-    def _decode(row):
+    def _decode(row, collection=None):
         if not row:
             return None
         row = dict(row)
@@ -136,6 +164,9 @@ class DataStore:
         )
         if row.get("external_id"):
             payload["external_id"] = row["external_id"]
+        for key in INDEXED_FIELDS.get(collection, set()):
+            if key in row and row.get(key) is not None:
+                payload[key] = row[key]
         return payload
 
     def insert(self, collection: str, document: dict) -> str:
@@ -156,6 +187,10 @@ class DataStore:
         }
         if collection == "users":
             values["external_id"] = external_id
+        if collection == "catalog_items":
+            values.update(
+                {key: document.get(key) for key in INDEXED_FIELDS["catalog_items"]}
+            )
         with self._lock, self.engine.begin() as connection:
             connection.execute(table.insert().values(**values))
         return record_id
@@ -169,9 +204,7 @@ class DataStore:
     ) -> list:
         table = self._table(collection)
         query = query or {}
-        supported = {"id", "owner_user_id"}
-        if collection == "users":
-            supported.add("external_id")
+        supported = {"id", "owner_user_id"} | INDEXED_FIELDS.get(collection, set())
         statement = select(table)
         for key in supported:
             if key in query:
@@ -184,7 +217,8 @@ class DataStore:
             )
         with self.engine.connect() as connection:
             candidates = [
-                self._decode(row) for row in connection.execute(statement).mappings()
+                self._decode(row, collection)
+                for row in connection.execute(statement).mappings()
             ]
         matches = [
             doc for doc in candidates if all(doc.get(k) == v for k, v in query.items())
@@ -211,6 +245,10 @@ class DataStore:
         }
         if collection == "users":
             values["external_id"] = existing.get("external_id")
+        if collection == "catalog_items":
+            values.update(
+                {key: existing.get(key) for key in INDEXED_FIELDS["catalog_items"]}
+            )
         with self._lock, self.engine.begin() as connection:
             connection.execute(
                 table.update().where(table.c.id == record_id).values(**values)
@@ -239,7 +277,8 @@ class DataStore:
         statement = select(table).order_by(table.c.created_at.asc())
         with self.engine.connect() as connection:
             return [
-                self._decode(row) for row in connection.execute(statement).mappings()
+                self._decode(row, collection)
+                for row in connection.execute(statement).mappings()
             ]
 
 

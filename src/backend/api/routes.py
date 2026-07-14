@@ -11,7 +11,7 @@ from functools import wraps
 from urllib.parse import urlparse
 
 import requests
-from flask import Blueprint, current_app, jsonify, request, session
+from flask import Blueprint, Response, current_app, jsonify, request, session
 from sqlalchemy.exc import IntegrityError
 
 from models.data_store import db
@@ -24,6 +24,7 @@ from services.auth_service import (
     WechatAuthError,
     WechatAuthService,
 )
+from services.catalog_service import enrich_recommendations
 from services.object_storage import create_object_storage
 
 api_bp = Blueprint("api", __name__)
@@ -339,8 +340,8 @@ def analyze_image():
             "description": analysis.get("description", ""),
             "overallStyle": recommendation.get("overall_style", ""),
             "styleTips": recommendation.get("style_tips", ""),
-            "recommendations": _format_recommendations(
-                recommendation.get("recommendations", [])
+            "recommendations": _catalog_recommendations(
+                _format_recommendations(recommendation.get("recommendations", []))
             ),
         }
         db.insert("results", result.copy())
@@ -558,6 +559,55 @@ def feedback():
     return jsonify({"success": True, "data": {"id": item_id}}), 201
 
 
+@api_bp.get("/catalog")
+@login_required
+def catalog_items():
+    page, per_page = _pagination()
+    query = {"review_status": "approved"}
+    for key in ("category", "garment_type"):
+        value = str(request.args.get(key, "")).strip()[:64]
+        if value:
+            query[key] = value
+    items = db.find_many("catalog_items", query, per_page, (page - 1) * per_page)
+    return jsonify(
+        {
+            "success": True,
+            "data": [_public_catalog_item(item) for item in items],
+            "pagination": {
+                "page": page,
+                "perPage": per_page,
+                "hasMore": len(items) == per_page,
+            },
+        }
+    )
+
+
+@api_bp.get("/catalog/<item_id>")
+@login_required
+def catalog_item(item_id):
+    item = db.find_one("catalog_items", {"id": item_id, "review_status": "approved"})
+    return (
+        jsonify({"success": True, "data": _public_catalog_item(item)})
+        if item
+        else _error("目录单品不存在", 404, "NOT_FOUND")
+    )
+
+
+@api_bp.get("/catalog/<item_id>/image")
+@login_required
+def catalog_item_image(item_id):
+    item = db.find_one("catalog_items", {"id": item_id, "review_status": "approved"})
+    if not item or not item.get("imageKey"):
+        return _error("目录图片不存在", 404, "NOT_FOUND")
+    try:
+        body, content_type = create_object_storage(current_app.config).read(
+            item["imageKey"]
+        )
+    except (FileNotFoundError, KeyError):
+        return _error("目录图片不存在", 404, "NOT_FOUND")
+    return Response(body, mimetype=content_type)
+
+
 @api_bp.post("/recommend")
 @login_required
 def get_recommendations():
@@ -569,7 +619,9 @@ def get_recommendations():
         value = ai_service.generate_recommendations(analysis)
     except AIServiceError as exc:
         return _error("AI 服务暂时不可用", 503, str(exc))
-    formatted = _format_recommendations(value.get("recommendations", []))
+    formatted = _catalog_recommendations(
+        _format_recommendations(value.get("recommendations", []))
+    )
     scene = data.get("scene", "all")
     if scene != "all":
         formatted = [item for item in formatted if scene in item.get("scenes", [])]
@@ -746,3 +798,29 @@ def _format_recommendations(items):
         }
         for i, item in enumerate(items)
     ]
+
+
+def _catalog_recommendations(items):
+    catalog = db.find_many("catalog_items", {"review_status": "approved"}, limit=100)
+    return enrich_recommendations(items, catalog)
+
+
+def _public_catalog_item(item):
+    public_fields = {
+        "id",
+        "name",
+        "category",
+        "garment_type",
+        "color_name",
+        "material",
+        "pattern",
+        "styles",
+        "scenes",
+        "seasons",
+        "description",
+        "created_at",
+        "updated_at",
+    }
+    value = {key: item.get(key) for key in public_fields if item.get(key) is not None}
+    value["image_url"] = f"/api/catalog/{value['id']}/image"
+    return value
