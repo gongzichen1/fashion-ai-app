@@ -1,0 +1,153 @@
+.tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+  height: calc(122rpx + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  background: transparent;
+}
+
+.tabbar-bg {
+  position: relative;
+  height: 122rpx;
+  background: rgba(255, 255, 255, 0.96);
+  border-top: 1rpx solid rgba(31, 31, 36, 0.08);
+  box-shadow: 0 -8rpx 30rpx rgba(31, 31, 36, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 82rpx;
+}
+
+.tab-item {
+  width: 150rpx;
+  height: 104rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #A7A8B8;
+}
+
+.tab-item.active {
+  color: #E6A9BF;
+}
+
+.tab-text {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.home-icon,
+.user-icon {
+  position: relative;
+  width: 48rpx;
+  height: 48rpx;
+}
+
+.home-roof {
+  position: absolute;
+  left: 8rpx;
+  top: 4rpx;
+  width: 31rpx;
+  height: 31rpx;
+  border-left: 6rpx solid currentColor;
+  border-top: 6rpx solid currentColor;
+  transform: rotate(45deg);
+  border-radius: 5rpx;
+}
+
+.home-body {
+  position: absolute;
+  left: 9rpx;
+  bottom: 2rpx;
+  width: 30rpx;
+  height: 28rpx;
+  border: 6rpx solid currentColor;
+  border-top: none;
+  border-radius: 4rpx;
+}
+
+.user-head {
+  position: absolute;
+  left: 15rpx;
+  top: 4rpx;
+  width: 18rpx;
+  height: 18rpx;
+  border: 6rpx solid currentColor;
+  border-radius: 50%;
+}
+
+.user-shoulder {
+  position: absolute;
+  left: 7rpx;
+  bottom: 2rpx;
+  width: 34rpx;
+  height: 22rpx;
+  border: 6rpx solid currentColor;
+  border-bottom: none;
+  border-radius: 28rpx 28rpx 0 0;
+}
+
+.tab-center {
+  position: absolute;
+  left: 50%;
+  top: -40rpx;
+  transform: translateX(-50%);
+  width: 134rpx;
+  height: 134rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 12rpx 44rpx rgba(232, 183, 200, 0.32);
+}
+
+.camera-fab {
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 50%;
+  background: #E8B7C8;
+  border: 8rpx solid #F7D8E4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.camera-fab.active {
+  background: #D99FBA;
+}
+
+.camera-glyph {
+  position: relative;
+  width: 54rpx;
+  height: 42rpx;
+  border: 6rpx solid #FFFFFF;
+  border-radius: 9rpx;
+}
+
+.camera-top-line {
+  position: absolute;
+  left: 11rpx;
+  top: -14rpx;
+  width: 24rpx;
+  height: 12rpx;
+  border: 6rpx solid #FFFFFF;
+  border-bottom: none;
+  border-radius: 10rpx 10rpx 0 0;
+}
+
+.camera-lens {
+  position: absolute;
+  left: 16rpx;
+  top: 9rpx;
+  width: 14rpx;
+  height: 14rpx;
+  border: 5rpx solid #FFFFFF;
+  border-radius: 50%;
+}

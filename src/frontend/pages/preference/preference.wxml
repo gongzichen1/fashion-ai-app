@@ -1,40 +1,35 @@
-<view class="page">
-  <view class="section">
-    <text class="section-title">喜欢的风格</text>
-    <view class="tag-list">
-      <view
-        class="tag {{item.selected ? 'active' : ''}}"
-        wx:for="{{styleOptions}}"
-        wx:key="name"
-        bindtap="toggleStyle"
-        data-value="{{item.name}}"
-      >{{item.name}}</view>
+<view class="settings-page">
+  <view class="page-head">
+    <text class="eyebrow">STYLE PROFILE</text>
+    <text class="page-title">风格偏好</text>
+    <text class="page-desc">告诉智搭你更常穿的风格和场景，后续推荐会更贴近你的日常。</text>
+  </view>
+
+  <view class="panel">
+    <text class="panel-title">喜欢的风格</text>
+    <view class="chip-grid">
+      <view class="chip {{item.selected ? 'active' : ''}}" wx:for="{{styleOptions}}" wx:key="name" bindtap="toggleStyle" data-value="{{item.name}}">
+        {{item.name}}
+      </view>
     </view>
   </view>
 
-  <view class="section">
-    <text class="section-title">常穿场景</text>
-    <view class="tag-list">
-      <view
-        class="tag {{item.selected ? 'active' : ''}}"
-        wx:for="{{sceneOptions}}"
-        wx:key="name"
-        bindtap="toggleScene"
-        data-value="{{item.name}}"
-      >{{item.name}}</view>
+  <view class="panel">
+    <text class="panel-title">常见场景</text>
+    <view class="chip-grid">
+      <view class="chip scene {{item.selected ? 'active' : ''}}" wx:for="{{sceneOptions}}" wx:key="name" bindtap="toggleScene" data-value="{{item.name}}">
+        {{item.name}}
+      </view>
     </view>
   </view>
 
-  <view class="section">
-    <text class="section-title">预算范围</text>
-    <view class="tag-list">
-      <view
-        class="tag {{budget === item ? 'active' : ''}}"
-        wx:for="{{budgets}}"
-        wx:key="*this"
-        bindtap="chooseBudget"
-        data-value="{{item}}"
-      >{{item}}</view>
+  <view class="panel">
+    <text class="panel-title">预算偏好</text>
+    <view class="budget-list">
+      <view class="budget-card {{budget === item ? 'active' : ''}}" wx:for="{{budgets}}" wx:key="*this" bindtap="chooseBudget" data-value="{{item}}">
+        <text class="budget-name">{{item}}</text>
+        <text class="budget-desc">{{item === '实惠' ? '优先高性价比' : (item === '中等' ? '品质与价格平衡' : '更重视质感品牌')}}</text>
+      </view>
     </view>
   </view>
 

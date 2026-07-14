@@ -11,7 +11,8 @@
 - 当前仓库自带的 `src/backend/venv` 仍是 Python 3.9，因此测试会提示 Python 3.9/LibreSSL 相关环境警告；代码和文档已改为要求 Python 3.10+，上线应重建 venv。
 - 当前 Homebrew Python 3.14.5 未安装 Flask、python-dotenv、pytest 等项目依赖；不能直接视为可用上线环境。
 - 生产环境需要确认 `DEBUG=False`、非默认 `SECRET_KEY`、真实模型 API Key 和 CORS 范围。
-- 微信开发者工具真机预览仍未执行；定位、相机、相册上传、真实 AI 分析、保存图片、分享入口必须人工验收。
+- 微信开发者工具 CLI 已生成真机预览二维码，但定位、相机、相册上传、真实 AI 分析、保存图片、分享入口仍需要用户在手机上扫码人工验收。
+- `2026-06-03` 一次修正中首页 `index.wxss` 多出一个 `}`，微信开发者工具仅报 `compile_start code 10`，已定位并修复；后续遇到同类错误优先检查 WXSS 语法。
 - 本机 Docker CLI 存在但 Docker 后台未运行，因此未完成本地镜像构建验证；需要依赖 CloudBase 构建日志或启动 Docker 后复验。
 - CloudBase 云托管容器本地文件系统不适合作为长期持久化存储；当前服务端历史结果可能随实例重启丢失，正式长期用户数据应接 CloudBase 数据库/对象存储。
 - CloudBase 默认域名页面提示仅限开发测试且存在访问频率、功能和稳定性限制；正式长期运营建议后续绑定自定义域名。

@@ -1,52 +1,117 @@
-.page {
+.settings-page {
   min-height: 100vh;
-  padding: 30rpx;
-  background-color: #F8F8F8;
+  padding: 40rpx 40rpx 56rpx;
+  background: #F8F6F2;
 }
 
-.section {
-  margin-bottom: 28rpx;
-  padding: 30rpx;
-  border-radius: 20rpx;
-  background-color: #FFFFFF;
+.page-head {
+  padding: 10rpx 0 18rpx;
 }
 
-.section-title {
+.eyebrow {
   display: block;
-  margin-bottom: 20rpx;
-  font-size: 30rpx;
-  font-weight: 600;
-  color: #333;
+  color: #D79AB4;
+  font-size: 22rpx;
+  font-weight: 800;
+  letter-spacing: 1rpx;
 }
 
-.tag-list {
+.page-title {
+  display: block;
+  margin-top: 8rpx;
+  color: #1F1F24;
+  font-size: 44rpx;
+  line-height: 1.25;
+  font-weight: 800;
+}
+
+.page-desc {
+  display: block;
+  margin-top: 12rpx;
+  color: #6B6B78;
+  font-size: 26rpx;
+  line-height: 1.6;
+}
+
+.panel {
+  margin-top: 24rpx;
+  padding: 30rpx;
+  border-radius: 36rpx;
+  background: #FFFFFF;
+  box-shadow: 0 4rpx 24rpx rgba(31, 31, 36, 0.05);
+}
+
+.panel-title {
+  display: block;
+  margin-bottom: 22rpx;
+  color: #1F1F24;
+  font-size: 30rpx;
+  font-weight: 800;
+}
+
+.chip-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 16rpx;
 }
 
-.tag {
-  padding: 14rpx 26rpx;
-  border-radius: 30rpx;
-  background-color: #F5F5F5;
-  color: #666;
+.chip {
+  margin: 0 16rpx 16rpx 0;
+  padding: 18rpx 28rpx;
+  border-radius: 999rpx;
+  background: #F0EDE8;
+  color: #6B6B78;
   font-size: 26rpx;
+  font-weight: 700;
 }
 
-.tag.active {
-  background-color: #FFE4EC;
-  color: #FF6B9D;
+.chip.scene {
+  background: #EEF5F4;
+}
+
+.chip.active {
+  background: #E8B7C8;
+  color: #1F1F24;
+}
+
+.budget-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.budget-card {
+  margin-bottom: 16rpx;
+  padding: 24rpx;
+  border-radius: 28rpx;
+  background: #F8F6F2;
+  border: 2rpx solid transparent;
+}
+
+.budget-card.active {
+  background: #FBF0F4;
+  border-color: #E8B7C8;
+}
+
+.budget-name {
+  display: block;
+  color: #1F1F24;
+  font-size: 28rpx;
+  font-weight: 800;
+}
+
+.budget-desc {
+  display: block;
+  margin-top: 6rpx;
+  color: #9B9BA8;
+  font-size: 23rpx;
 }
 
 .save-btn {
-  margin-top: 20rpx;
-  border: none;
-  border-radius: 44rpx;
-  background: linear-gradient(135deg, #FF6B9D 0%, #FF8FB1 100%);
-  color: #FFFFFF;
+  margin-top: 32rpx;
+  height: 92rpx;
+  border-radius: 30rpx;
+  background: linear-gradient(135deg, #E8B7C8, #D9A5BB);
+  color: #1F1F24;
   font-size: 30rpx;
-}
-
-.save-btn::after {
-  border: none;
+  font-weight: 800;
+  box-shadow: 0 14rpx 34rpx rgba(232, 183, 200, 0.28);
 }

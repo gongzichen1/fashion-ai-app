@@ -6,10 +6,10 @@ const { formatRelativeTime } = require('../../utils/util');
 Page({
   data: {
     features: [
-      { icon: '/images/icon-ai.png', title: 'AI识别', action: 'camera', tone: 'rose' },
-      { icon: '/images/icon-match.png', title: '搭配推荐', action: 'profile', tone: 'gold' },
-      { icon: '/images/icon-shop.png', title: '天气穿搭', action: 'weather', tone: 'sage' },
-      { icon: '/images/icon-style.png', title: '智能衣橱', action: 'profile', tone: 'lavender' }
+      { title: 'AI识别', action: 'camera', tone: 'rose', symbol: '✧' },
+      { title: '搭配推荐', action: 'profile', tone: 'gold', symbol: '♙' },
+      { title: '天气穿搭', action: 'weather', tone: 'sage', symbol: '☁' },
+      { title: '智能衣橱', action: 'profile', tone: 'lavender', symbol: '▦' }
     ],
     hotStyles: [
       { id: 1, name: '优雅通勤风', image: `${apiHost}/static/images/style-1.png`, count: '2.3万人使用' },
@@ -28,13 +28,22 @@ Page({
 
   onShow() {
     this.loadRecentHistory();
+    this.setTabBarSelected();
+  },
+
+  setTabBarSelected() {
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().setData({ selected: 0 });
+    }
   },
 
   loadRecentHistory() {
     const history = app.globalData.uploadHistory.slice(0, 3).map(item => ({
       ...item,
       image: this.normalizeImageUrl(item.image),
-      displayTime: item.timestamp ? formatRelativeTime(item.timestamp) : ''
+      displayTime: item.timestamp ? formatRelativeTime(item.timestamp) : '',
+      firstStyle: (item.styles || [])[0] || '',
+      secondStyle: (item.styles || [])[1] || ''
     }));
     this.setData({ recentHistory: history });
   },

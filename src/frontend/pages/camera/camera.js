@@ -17,6 +17,7 @@ Page({
   },
 
   onShow() {
+    this.setTabBarSelected();
     // 检查是否有选择的风格
     if (app.globalData.selectedStyle) {
       this.setData({
@@ -27,6 +28,12 @@ Page({
         icon: 'none',
         duration: 2000
       });
+    }
+  },
+
+  setTabBarSelected() {
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().setData({ selected: 1 });
     }
   },
 

@@ -84,11 +84,16 @@ Page({
       ...item,
       image: this.normalizeImageUrl(item.image)
     }));
+    const scenesText = Array.isArray(result.scenes) && result.scenes.length
+      ? result.scenes.join(' / ')
+      : (result.scenesText || '日常 / 通勤');
 
     return {
       ...result,
       image: this.normalizeImageUrl(result.image),
       serverImage: this.normalizeImageUrl(result.serverImage),
+      displayColor: result.primaryColor || '#E8DDD0',
+      scenesText,
       recommendations
     };
   },

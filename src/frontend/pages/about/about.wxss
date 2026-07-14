@@ -1,46 +1,113 @@
-.page {
+.about-page {
   min-height: 100vh;
-  padding: 60rpx 30rpx;
-  background-color: #F8F8F8;
+  padding: 40rpx 40rpx 56rpx;
+  background: #F8F6F2;
+}
+
+.brand-hero {
+  min-height: 420rpx;
+  padding: 54rpx 36rpx;
+  border-radius: 42rpx;
+  background: linear-gradient(160deg, #EDD8E4 0%, #E8E2DC 58%, #D9CCBF 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
 }
 
-.logo {
-  width: 140rpx;
-  height: 140rpx;
-  margin-bottom: 20rpx;
+.logo-wrap {
+  width: 124rpx;
+  height: 124rpx;
+  border-radius: 36rpx;
+  background: rgba(255, 255, 255, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10rpx 30rpx rgba(232, 183, 200, 0.28);
 }
 
-.title {
-  display: block;
-  color: #333;
-  font-size: 38rpx;
-  font-weight: 600;
+.logo {
+  width: 84rpx;
+  height: 84rpx;
+}
+
+.brand-title {
+  margin-top: 26rpx;
+  color: #1F1F24;
+  font-size: 48rpx;
+  line-height: 1.2;
+  font-weight: 900;
+}
+
+.brand-subtitle {
+  margin-top: 12rpx;
+  color: #6B5060;
+  font-size: 28rpx;
 }
 
 .version {
-  display: block;
-  margin-top: 8rpx;
-  color: #999;
-  font-size: 26rpx;
+  margin-top: 22rpx;
+  padding: 8rpx 20rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.5);
+  color: #6B5060;
+  font-size: 22rpx;
 }
 
-.card {
-  margin-top: 40rpx;
-  padding: 30rpx;
-  border-radius: 20rpx;
-  background-color: #FFFFFF;
-  text-align: left;
+.feature-list,
+.privacy-card {
+  margin-top: 28rpx;
 }
 
-.paragraph {
+.feature-card {
+  margin-bottom: 20rpx;
+  padding: 28rpx;
+  border-radius: 34rpx;
+  background: #FFFFFF;
+  box-shadow: 0 4rpx 20rpx rgba(31, 31, 36, 0.05);
+  display: flex;
+  align-items: center;
+}
+
+.feature-icon {
+  width: 58rpx;
+  height: 58rpx;
+  margin-right: 24rpx;
+}
+
+.feature-title {
   display: block;
-  margin-bottom: 18rpx;
-  color: #666;
+  color: #1F1F24;
   font-size: 28rpx;
-  line-height: 1.7;
+  font-weight: 800;
 }
 
-.paragraph:last-child {
-  margin-bottom: 0;
+.feature-desc {
+  display: block;
+  margin-top: 6rpx;
+  color: #6B6B78;
+  font-size: 24rpx;
+  line-height: 1.55;
+}
+
+.privacy-card {
+  padding: 30rpx;
+  border-radius: 34rpx;
+  background: linear-gradient(135deg, #FBF0F4, #F5EEF8);
+}
+
+.privacy-title {
+  display: block;
+  color: #1F1F24;
+  font-size: 28rpx;
+  font-weight: 800;
+}
+
+.privacy-text {
+  display: block;
+  margin-top: 10rpx;
+  color: #6B6B78;
+  font-size: 24rpx;
+  line-height: 1.65;
 }

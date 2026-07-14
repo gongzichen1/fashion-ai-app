@@ -1,9 +1,18 @@
-<view class="page">
-  <view class="form-card">
-    <text class="label">反馈内容</text>
-    <textarea class="textarea" value="{{content}}" data-field="content" bindinput="onInput" placeholder="请描述你遇到的问题或建议" maxlength="300" />
-    <text class="label contact-label">联系方式</text>
-    <input class="input" value="{{contact}}" data-field="contact" bindinput="onInput" placeholder="选填，便于我们联系你" />
+<view class="settings-page">
+  <view class="page-head">
+    <text class="eyebrow">FEEDBACK</text>
+    <text class="page-title">反馈建议</text>
+    <text class="page-desc">告诉我们哪里不好用、哪里需要增强，反馈会保存在本地记录中。</text>
   </view>
-  <button class="submit-btn" bindtap="submitFeedback">提交反馈</button>
+
+  <view class="panel">
+    <text class="panel-title">你的建议</text>
+    <textarea class="feedback-textarea" maxlength="500" placeholder="例如：某个页面点不动、识别结果不准确、UI 不够清晰..." value="{{content}}" bindinput="onInput" data-field="content"></textarea>
+    <view class="field-row compact">
+      <text class="field-label">联系方式</text>
+      <input class="field-input" placeholder="选填，微信/手机号/邮箱" value="{{contact}}" bindinput="onInput" data-field="contact" />
+    </view>
+  </view>
+
+  <button class="save-btn" bindtap="submitFeedback">提交反馈</button>
 </view>

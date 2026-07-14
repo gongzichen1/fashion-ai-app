@@ -43,7 +43,7 @@
         </view>
         <view class="attr-item">
           <text class="attr-label">适合场合</text>
-          <text class="attr-value">{{analysisResult.scenesText || '日常 / 通勤'}}</text>
+          <text class="attr-value">{{analysisResult.scenesText}}</text>
         </view>
       </view>
       <view class="tag-row" wx:if="{{analysisResult.styles && analysisResult.styles.length}}">
@@ -58,7 +58,7 @@
         <text class="card-title small">色彩分析</text>
       </view>
       <view class="palette-row">
-        <view class="color-dot main-color" style="background: {{analysisResult.primaryColor || '#E8DDD0'}};"></view>
+        <view class="color-dot main-color" style="background: {{analysisResult.displayColor}};"></view>
         <view class="color-dot color-a"></view>
         <view class="color-dot color-b"></view>
         <view class="color-dot color-c"></view>

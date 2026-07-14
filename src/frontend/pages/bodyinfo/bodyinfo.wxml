@@ -1,26 +1,37 @@
-<view class="page">
-  <view class="form-card">
-    <view class="field">
-      <text class="label">身高 cm</text>
-      <input class="input" type="number" value="{{height}}" data-field="height" bindinput="onInput" placeholder="请输入身高" />
+<view class="settings-page">
+  <view class="page-head">
+    <text class="eyebrow">BODY PROFILE</text>
+    <text class="page-title">体型档案</text>
+    <text class="page-desc">完善身高、体重和体型信息，AI 会更准确地判断版型、长度和比例。</text>
+  </view>
+
+  <view class="panel">
+    <text class="panel-title">基础信息</text>
+    <view class="field-row">
+      <text class="field-label">身高</text>
+      <input class="field-input" type="number" placeholder="请输入 cm" value="{{height}}" bindinput="onInput" data-field="height" />
+      <text class="unit">cm</text>
     </view>
-    <view class="field">
-      <text class="label">体重 kg</text>
-      <input class="input" type="digit" value="{{weight}}" data-field="weight" bindinput="onInput" placeholder="请输入体重" />
+    <view class="field-row">
+      <text class="field-label">体重</text>
+      <input class="field-input" type="digit" placeholder="请输入 kg" value="{{weight}}" bindinput="onInput" data-field="weight" />
+      <text class="unit">kg</text>
     </view>
-    <view class="field">
-      <text class="label">身材类型</text>
-      <view class="tag-list">
-        <view
-          class="tag {{item.selected ? 'active' : ''}}"
-          wx:for="{{bodyTypeOptions}}"
-          wx:key="name"
-          bindtap="chooseBodyType"
-          data-value="{{item.name}}"
-        >{{item.name}}</view>
+  </view>
+
+  <view class="panel">
+    <text class="panel-title">体型特征</text>
+    <view class="body-grid">
+      <view class="body-chip {{item.selected ? 'active' : ''}}" wx:for="{{bodyTypeOptions}}" wx:key="name" bindtap="chooseBodyType" data-value="{{item.name}}">
+        {{item.name}}
       </view>
     </view>
   </view>
 
-  <button class="save-btn" bindtap="saveBodyInfo">保存身材信息</button>
+  <view class="tip-card">
+    <text class="tip-title">推荐会如何使用这些信息？</text>
+    <text class="tip-text">例如梨形身材会更关注下装廓形，H形身材会更强调腰线和层次。</text>
+  </view>
+
+  <button class="save-btn" bindtap="saveBodyInfo">保存档案</button>
 </view>

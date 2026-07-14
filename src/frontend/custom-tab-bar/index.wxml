@@ -1,0 +1,28 @@
+<view class="tabbar">
+  <view class="tabbar-bg">
+    <view class="tab-item {{selected === 0 ? 'active' : ''}}" bindtap="switchTab" data-path="/pages/index/index">
+      <view class="home-icon">
+        <view class="home-roof"></view>
+        <view class="home-body"></view>
+      </view>
+      <text class="tab-text">首页</text>
+    </view>
+
+    <view class="tab-center" bindtap="switchTab" data-path="/pages/camera/camera">
+      <view class="camera-fab {{selected === 1 ? 'active' : ''}}">
+        <view class="camera-glyph">
+          <view class="camera-top-line"></view>
+          <view class="camera-lens"></view>
+        </view>
+      </view>
+    </view>
+
+    <view class="tab-item {{selected === 2 ? 'active' : ''}}" bindtap="switchTab" data-path="/pages/profile/profile">
+      <view class="user-icon">
+        <view class="user-head"></view>
+        <view class="user-shoulder"></view>
+      </view>
+      <text class="tab-text">我的</text>
+    </view>
+  </view>
+</view>

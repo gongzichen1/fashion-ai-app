@@ -11,10 +11,10 @@ Page({
     wardrobeList: [],
     currentTab: 'history', // history | collect | wardrobe
     menuList: [
-      { icon: '/images/icon-style.png', title: '我的风格偏好', desc: '设置喜欢的穿搭风格', path: '/pages/preference/preference' },
-      { icon: '/images/icon-body.png', title: '身材信息', desc: '完善身材数据获取更精准推荐', path: '/pages/bodyinfo/bodyinfo' },
-      { icon: '/images/icon-feedback.png', title: '意见反馈', desc: '帮助我们做得更好', path: '/pages/feedback/feedback' },
-      { icon: '/images/icon-about.png', title: '关于我们', desc: '了解更多', path: '/pages/about/about' }
+      { icon: '/images/icon-style.png', title: '风格偏好', desc: '设置喜欢的穿搭风格', path: '/pages/preference/preference', badge: '已设置' },
+      { icon: '/images/icon-body.png', title: '体型档案', desc: '完善身材数据获取更精准推荐', path: '/pages/bodyinfo/bodyinfo' },
+      { icon: '/images/icon-feedback.png', title: '反馈建议', desc: '帮助我们做得更好', path: '/pages/feedback/feedback' },
+      { icon: '/images/icon-about.png', title: '关于智搭', desc: '版本与服务说明', path: '/pages/about/about' }
     ]
   },
 
@@ -24,7 +24,14 @@ Page({
   },
 
   onShow() {
+    this.setTabBarSelected();
     this.loadHistory();
+  },
+
+  setTabBarSelected() {
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().setData({ selected: 2 });
+    }
   },
 
   checkUserInfo() {
@@ -91,7 +98,7 @@ Page({
         resultId: history.id,
         name: item.name || item.type || '推荐单品',
         type: item.type || '搭配单品',
-        image: this.normalizeImageUrl(item.image),
+        image: this.normalizeImageUrl(item.image) || history.image,
         displayTime: history.displayTime
       }));
 

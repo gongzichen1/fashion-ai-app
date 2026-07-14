@@ -1,9 +1,39 @@
-<view class="page">
-  <image class="logo" src="/images/logo.png" mode="aspectFit"></image>
-  <text class="title">智搭</text>
-  <text class="version">v1.0.0</text>
-  <view class="card">
-    <text class="paragraph">智搭通过拍照识别服装，结合天气、场景和个人偏好生成穿搭建议。</text>
-    <text class="paragraph">当前版本支持拍照分析、天气穿搭、历史记录、收藏搭配和本地衣橱。</text>
+<view class="about-page">
+  <view class="brand-hero">
+    <view class="logo-wrap">
+      <image class="logo" src="/images/logo.png" mode="aspectFit"></image>
+    </view>
+    <text class="brand-title">智搭</text>
+    <text class="brand-subtitle">AI 穿搭识别与推荐助手</text>
+    <text class="version">Version 1.0.0</text>
+  </view>
+
+  <view class="feature-list">
+    <view class="feature-card">
+      <image class="feature-icon" src="/images/icon-ai.png"></image>
+      <view>
+        <text class="feature-title">AI 识别</text>
+        <text class="feature-desc">识别服装类型、颜色、风格与适合场景。</text>
+      </view>
+    </view>
+    <view class="feature-card">
+      <image class="feature-icon" src="/images/icon-match.png"></image>
+      <view>
+        <text class="feature-title">搭配推荐</text>
+        <text class="feature-desc">根据单品、天气和偏好生成可执行的穿搭建议。</text>
+      </view>
+    </view>
+    <view class="feature-card">
+      <image class="feature-icon" src="/images/icon-shop.png"></image>
+      <view>
+        <text class="feature-title">天气穿搭</text>
+        <text class="feature-desc">结合当地天气给出当天穿衣提示。</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="privacy-card">
+    <text class="privacy-title">隐私说明</text>
+    <text class="privacy-text">图片仅用于完成当前 AI 分析和结果展示。上线前仍需在微信后台补充正式隐私政策与服务条款。</text>
   </view>
 </view>

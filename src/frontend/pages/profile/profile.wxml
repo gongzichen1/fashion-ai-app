@@ -1,167 +1,152 @@
 <!--pages/profile/profile.wxml - 个人中心模板-->
 <view class="profile-page">
-  <!-- 用户信息区域 -->
-  <view class="user-section">
-    <view class="user-info" wx:if="{{hasUserInfo}}" bindtap="getUserProfile">
-      <image class="avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
-      <view class="user-detail">
-        <text class="nickname">{{userInfo.nickName}}</text>
+  <view class="profile-hero">
+    <view class="user-row" wx:if="{{hasUserInfo}}" bindtap="getUserProfile">
+      <view class="avatar-wrap">
+        <image class="avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
+        <view class="online-dot"></view>
+      </view>
+      <view class="user-copy">
+        <view class="name-row">
+          <text class="nickname">{{userInfo.nickName}}</text>
+          <text class="member-badge">会员</text>
+        </view>
         <text class="user-tip">点击编辑头像昵称</text>
       </view>
+      <view class="settings-dot">✦</view>
     </view>
 
-    <button class="login-btn" wx:else bindtap="getUserProfile">
-      <image class="avatar-default" src="/images/avatar-default.svg"></image>
-      <text class="login-text">点击登录</text>
+    <button class="login-card" wx:else bindtap="getUserProfile">
+      <view class="avatar-wrap">
+        <image class="avatar" src="/images/avatar-default.svg"></image>
+        <view class="online-dot"></view>
+      </view>
+      <view class="user-copy">
+        <view class="name-row">
+          <text class="nickname">登录后同步穿搭档案</text>
+          <text class="member-badge">智搭</text>
+        </view>
+        <text class="user-tip">点击授权头像昵称</text>
+      </view>
     </button>
-  </view>
 
-  <!-- 数据统计 -->
-  <view class="stats-bar">
-    <view class="stat-item" bindtap="switchToStat" data-tab="history">
-      <text class="stat-num">{{historyList.length}}</text>
-      <text class="stat-label">分析记录</text>
-    </view>
-    <view class="stat-divider"></view>
-    <view class="stat-item" bindtap="switchToStat" data-tab="collect">
-      <text class="stat-num">{{collectList.length || 0}}</text>
-      <text class="stat-label">收藏搭配</text>
-    </view>
-    <view class="stat-divider"></view>
-    <view class="stat-item" bindtap="switchToStat" data-tab="wardrobe">
-      <text class="stat-num">{{wardrobeList.length || 0}}</text>
-      <text class="stat-label">衣橱单品</text>
+    <view class="stats-grid">
+      <view class="stat-card" bindtap="switchToStat" data-tab="history">
+        <text class="stat-num">{{historyList.length}}</text>
+        <text class="stat-label">分析记录</text>
+      </view>
+      <view class="stat-card" bindtap="switchToStat" data-tab="collect">
+        <text class="stat-num">{{collectList.length || 0}}</text>
+        <text class="stat-label">收藏搭配</text>
+      </view>
+      <view class="stat-card" bindtap="switchToStat" data-tab="wardrobe">
+        <text class="stat-num">{{wardrobeList.length || 0}}</text>
+        <text class="stat-label">衣橱单品</text>
+      </view>
     </view>
   </view>
 
-  <!-- 历史记录/收藏 -->
-  <view class="content-section">
-    <view class="tab-header">
-      <view
-        class="tab-item {{currentTab === 'history' ? 'active' : ''}}"
-        bindtap="switchTab"
-        data-tab="history"
-      >
-        历史记录
-      </view>
-      <view
-        class="tab-item {{currentTab === 'collect' ? 'active' : ''}}"
-        bindtap="switchTab"
-        data-tab="collect"
-      >
-        我的收藏
-      </view>
-      <view
-        class="tab-item {{currentTab === 'wardrobe' ? 'active' : ''}}"
-        bindtap="switchTab"
-        data-tab="wardrobe"
-      >
-        我的衣橱
-      </view>
-    </view>
+  <view class="tabs-shell">
+    <view class="tab-item {{currentTab === 'history' ? 'active' : ''}}" bindtap="switchTab" data-tab="history">历史记录</view>
+    <view class="tab-item {{currentTab === 'collect' ? 'active' : ''}}" bindtap="switchTab" data-tab="collect">我的收藏</view>
+    <view class="tab-item {{currentTab === 'wardrobe' ? 'active' : ''}}" bindtap="switchTab" data-tab="wardrobe">我的衣橱</view>
+  </view>
 
-    <!-- 历史记录列表 -->
-    <view class="tab-content" wx:if="{{currentTab === 'history'}}">
+  <view class="content-panel">
+    <view wx:if="{{currentTab === 'history'}}">
       <view class="history-list" wx:if="{{historyList.length > 0}}">
-        <view class="history-item" wx:for="{{historyList}}" wx:key="id">
-          <view class="history-info" bindtap="viewHistory" data-id="{{item.id}}">
+        <view class="history-card" wx:for="{{historyList}}" wx:key="id">
+          <view class="history-main" bindtap="viewHistory" data-id="{{item.id}}">
             <image class="history-image" src="{{item.image}}" mode="aspectFill"></image>
-            <view class="history-detail">
-              <text class="history-title">{{item.garmentType}}</text>
-              <text class="history-time">{{item.displayTime}}</text>
+            <view class="history-copy">
+              <text class="history-title">{{item.garmentType || 'AI分析结果'}}</text>
+              <text class="history-time">{{item.displayTime || '最近分析'}}</text>
+              <view class="mini-tags" wx:if="{{item.styles && item.styles.length}}">
+                <text class="mini-tag" wx:for="{{item.styles}}" wx:key="*this">{{item}}</text>
+              </view>
             </view>
+            <text class="chevron">›</text>
           </view>
-          <view class="history-actions">
-            <view class="action-delete" catchtap="deleteHistory" data-id="{{item.id}}" data-index="{{index}}">
-              <image class="delete-icon" src="/images/icon-delete.svg"></image>
-            </view>
+          <view class="delete-btn" catchtap="deleteHistory" data-id="{{item.id}}" data-index="{{index}}">
+            <image class="delete-icon" src="/images/icon-delete.svg"></image>
           </view>
         </view>
+        <view class="clear-link" bindtap="clearHistory">清空历史记录</view>
       </view>
 
       <view class="empty-state" wx:else>
         <image class="empty-icon" src="/images/empty.svg"></image>
         <text class="empty-text">暂无历史记录</text>
-        <text class="empty-tip">快去拍照获取搭配推荐吧</text>
+        <text class="empty-tip">拍一件衣服，生成第一套 AI 搭配</text>
         <button class="empty-btn" bindtap="goToCamera">去拍照</button>
-      </view>
-
-      <view class="clear-btn" wx:if="{{historyList.length > 0}}" bindtap="clearHistory">
-        清空历史记录
       </view>
     </view>
 
-    <!-- 收藏列表 -->
-    <view class="tab-content" wx:if="{{currentTab === 'collect'}}">
-      <view class="collect-list" wx:if="{{collectList.length > 0}}">
-        <view class="history-item" wx:for="{{collectList}}" wx:key="id">
-          <view class="history-info" bindtap="viewCollect" data-id="{{item.id}}">
-            <image class="history-image" src="{{item.image}}" mode="aspectFill"></image>
-            <view class="history-detail">
-              <text class="history-title">{{item.garmentType}}</text>
-              <text class="history-time">{{item.displayTime}}</text>
-            </view>
+    <view wx:if="{{currentTab === 'collect'}}">
+      <view class="collect-grid" wx:if="{{collectList.length > 0}}">
+        <view class="collect-card" wx:for="{{collectList}}" wx:key="id" bindtap="viewCollect" data-id="{{item.id}}">
+          <image class="collect-image" src="{{item.image}}" mode="aspectFill"></image>
+          <view class="collect-mask"></view>
+          <view class="collect-copy">
+            <text class="collect-title">{{item.garmentType || '收藏搭配'}}</text>
+            <text class="collect-time">{{item.displayTime || '已收藏'}}</text>
           </view>
+          <image class="heart-icon" src="/images/icon-collect-active.svg"></image>
         </view>
       </view>
 
       <view class="empty-state" wx:else>
         <image class="empty-icon" src="/images/empty.svg"></image>
         <text class="empty-text">暂无收藏</text>
-        <text class="empty-tip">喜欢的搭配可以收藏起来哦</text>
+        <text class="empty-tip">喜欢的搭配可以收藏起来</text>
       </view>
     </view>
 
-    <!-- 衣橱列表 -->
-    <view class="tab-content" wx:if="{{currentTab === 'wardrobe'}}">
+    <view wx:if="{{currentTab === 'wardrobe'}}">
       <view class="wardrobe-grid" wx:if="{{wardrobeList.length > 0}}">
-        <view
-          class="wardrobe-item"
-          wx:for="{{wardrobeList}}"
-          wx:key="id"
-          bindtap="viewWardrobeItem"
-          data-result-id="{{item.resultId}}"
-        >
+        <view class="wardrobe-card" wx:for="{{wardrobeList}}" wx:key="id" bindtap="viewWardrobeItem" data-result-id="{{item.resultId}}">
           <image class="wardrobe-image" src="{{item.image}}" mode="aspectFill"></image>
-          <text class="wardrobe-name">{{item.name}}</text>
-          <text class="wardrobe-type">{{item.type}}</text>
+          <view class="wardrobe-copy">
+            <text class="wardrobe-name">{{item.name}}</text>
+            <text class="wardrobe-type">{{item.type}}</text>
+          </view>
         </view>
       </view>
 
       <view class="empty-state" wx:else>
         <image class="empty-icon" src="/images/empty.svg"></image>
         <text class="empty-text">暂无衣橱单品</text>
-        <text class="empty-tip">完成一次AI分析后会自动加入衣橱</text>
+        <text class="empty-tip">完成一次 AI 分析后会自动加入衣橱</text>
         <button class="empty-btn" bindtap="goToCamera">去拍照</button>
       </view>
     </view>
   </view>
 
-  <!-- 菜单列表 -->
-  <view class="menu-section">
-    <view
-      class="menu-item"
-      wx:for="{{menuList}}"
-      wx:key="title"
-      bindtap="onMenuTap"
-      data-path="{{item.path}}"
-    >
-      <image class="menu-icon" src="{{item.icon}}"></image>
-      <view class="menu-content">
-        <text class="menu-title">{{item.title}}</text>
-        <text class="menu-desc">{{item.desc}}</text>
+  <view class="menu-card">
+    <view class="menu-item" wx:for="{{menuList}}" wx:key="title" bindtap="onMenuTap" data-path="{{item.path}}">
+      <view class="menu-left">
+        <view class="menu-icon-wrap">
+          <image class="menu-icon" src="{{item.icon}}"></image>
+        </view>
+        <view>
+          <text class="menu-title">{{item.title}}</text>
+          <text class="menu-desc">{{item.desc}}</text>
+        </view>
       </view>
-      <image class="menu-arrow" src="/images/icon-arrow.svg"></image>
+      <view class="menu-right">
+        <text class="menu-badge" wx:if="{{item.badge}}">{{item.badge}}</text>
+        <image class="menu-arrow" src="/images/icon-arrow.svg"></image>
+      </view>
     </view>
   </view>
 
-  <!-- 其他设置 -->
-  <view class="setting-section">
+  <view class="setting-card">
     <view class="setting-item" bindtap="clearCache">
-      <text class="setting-text">清除缓存</text>
+      <text>清除缓存</text>
+      <text class="setting-value">本地记录</text>
     </view>
     <view class="setting-item">
-      <text class="setting-text">当前版本</text>
+      <text>当前版本</text>
       <text class="setting-value">v1.0.0</text>
     </view>
   </view>

@@ -74,7 +74,7 @@
   <view class="feature-grid">
     <view class="feature-item" wx:for="{{features}}" wx:key="title" bindtap="onFeatureTap" data-action="{{item.action}}">
       <view class="feature-icon-wrap {{item.tone}}">
-        <image class="feature-icon" src="{{item.icon}}" mode="aspectFit"></image>
+        <text class="feature-symbol">{{item.symbol}}</text>
       </view>
       <text class="feature-title">{{item.title}}</text>
     </view>
@@ -89,6 +89,10 @@
       <view class="recent-list">
         <view class="recent-card" wx:for="{{recentHistory}}" wx:key="id" bindtap="goToResult" data-id="{{item.id}}">
           <image class="recent-image" src="{{item.image}}" mode="aspectFill"></image>
+          <view class="recent-tags" wx:if="{{item.firstStyle || item.secondStyle}}">
+            <text class="recent-tag" wx:if="{{item.firstStyle}}">{{item.firstStyle}}</text>
+            <text class="recent-tag" wx:if="{{item.secondStyle}}">{{item.secondStyle}}</text>
+          </view>
           <view class="recent-content">
             <text class="recent-title">{{item.garmentType || 'AI分析结果'}}</text>
             <text class="recent-time">{{item.displayTime || '刚刚'}}</text>
