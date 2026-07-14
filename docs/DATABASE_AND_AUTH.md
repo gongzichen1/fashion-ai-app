@@ -48,3 +48,22 @@ CORS_ORIGINS=https://<同源业务域名>
 6. 执行数据库备份与恢复演练，记录恢复时间和回滚负责人。
 
 当前代码已完成上述身份映射和隔离逻辑，但真实托管数据库、真实飞书凭据及双账号验收仍属于部署动作，未完成前不能标记正式上线。
+
+## 5. 双账号自动验收
+
+部署后分别从飞书移动端、桌面端取得两个测试账号的独立会话，保存为仓库外的临时 Cookie header 文件或 Playwright storage state。文件必须设置仅当前用户可读，禁止提交仓库、粘贴到聊天或写入 CI 日志。
+
+移动端与桌面端各执行一次：
+
+```bash
+chmod 600 /secure/a.cookie /secure/b.cookie
+.venv/bin/python scripts/verify_two_account_isolation.py \
+  --base-url https://<生产域名> \
+  --account-a /secure/a.cookie \
+  --account-b /secure/b.cookie \
+  --client mobile \
+  --image /secure/authorized-test-image.jpg \
+  --confirm-production-test
+```
+
+桌面端把 `--client` 改为 `desktop`。工具会先拒绝 SQLite、本地存储、未就绪 AI/飞书配置，再创建两条真实分析，验证跨账号结果、图片、收藏、衣橱和删除不可见，验证重复添加幂等以及最后一个引用删除后 COS 原图同步删除，最后清理测试数据。只有两次均输出 `two_account_isolation_verified` 才能通过双端验收。

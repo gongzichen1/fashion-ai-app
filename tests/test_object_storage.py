@@ -19,6 +19,7 @@ class FakeCosClient:
     def __init__(self):
         self.uploaded = None
         self.deleted = None
+        self.head_checked = False
 
     def upload_file(self, **kwargs):
         self.uploaded = kwargs
@@ -29,6 +30,10 @@ class FakeCosClient:
 
     def delete_object(self, **kwargs):
         self.deleted = kwargs
+
+    def head_bucket(self, **kwargs):
+        assert kwargs == {"Bucket": "private-bucket"}
+        self.head_checked = True
 
 
 def test_cos_storage_uses_private_proxy_contract(tmp_path):
@@ -58,6 +63,21 @@ def test_cos_storage_uses_private_proxy_contract(tmp_path):
     assert client.deleted == {"Bucket": "private-bucket", "Key": "user/image.png"}
     assert storage.health() == {
         "status": "ok",
+        "backend": "cos",
+        "persistent": True,
+    }
+    assert client.head_checked is True
+
+
+def test_cos_health_does_not_expose_provider_error():
+    class FailingCosClient:
+        def head_bucket(self, **kwargs):
+            raise RuntimeError("provider response containing a secret")
+
+    storage = CosObjectStorage("", "", "", "private-bucket", client=FailingCosClient())
+
+    assert storage.health() == {
+        "status": "error",
         "backend": "cos",
         "persistent": True,
     }

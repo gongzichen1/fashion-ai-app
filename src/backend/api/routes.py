@@ -498,10 +498,27 @@ def _resource_routes(name, collection):
     @api_bp.delete(f"{name}/<item_id>", endpoint=f"delete_{endpoint}")
     @login_required
     def delete_item(item_id):
-        deleted = db.delete_one(
-            collection, {"id": item_id, "owner_user_id": _current_user_id()}
+        query = {"id": item_id, "owner_user_id": _current_user_id()}
+        existing = db.find_one(collection, query)
+        deleted = db.delete_one(collection, query)
+        image_deleted = False
+        if deleted and existing and collection in {"favorites", "wardrobe_items"}:
+            retained = any(
+                db.find_one(candidate, query)
+                for candidate in ("results", "favorites", "wardrobe_items")
+            )
+            image_key = existing.get("imageKey")
+            if not retained and image_key:
+                image_deleted = create_object_storage(current_app.config).delete(
+                    image_key
+                )
+        return jsonify(
+            {
+                "success": True,
+                "deleted": deleted,
+                "imageDeleted": image_deleted,
+            }
         )
-        return jsonify({"success": True, "deleted": deleted})
 
 
 _resource_routes("/favorites", "favorites")

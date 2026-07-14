@@ -38,10 +38,10 @@ jobs:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
         run: |
           python -m pytest -q
-          python -m black --check src/backend tests scripts/verify_deployment.py
-          python -m isort --check-only src/backend tests scripts/verify_deployment.py
-          python -m flake8 src/backend tests scripts/verify_deployment.py --exclude=src/backend/venv --count --select=E9,F63,F7,F82 --show-source --statistics
-          python -m compileall -q src/backend tests scripts/verify_deployment.py
+          python -m black --check src/backend tests scripts/verify_deployment.py scripts/verify_two_account_isolation.py
+          python -m isort --check-only src/backend tests scripts/verify_deployment.py scripts/verify_two_account_isolation.py
+          python -m flake8 src/backend tests scripts/verify_deployment.py scripts/verify_two_account_isolation.py --exclude=src/backend/venv --count --select=E9,F63,F7,F82 --show-source --statistics
+          python -m compileall -q src/backend tests scripts/verify_deployment.py scripts/verify_two_account_isolation.py
           python -m pip_audit -r src/backend/requirements.txt
 
       - uses: actions/setup-node@v4

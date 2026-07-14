@@ -102,6 +102,10 @@ class CosObjectStorage:
         return True
 
     def health(self):
+        try:
+            self.client.head_bucket(Bucket=self.bucket)
+        except Exception:
+            return {"status": "error", "backend": self.backend, "persistent": True}
         return {"status": "ok", "backend": self.backend, "persistent": True}
 
 

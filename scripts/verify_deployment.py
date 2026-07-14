@@ -41,6 +41,21 @@ def verify_once(base_url):
             f"{name}={value.get('status')}" for name, value in components.items()
         )
         raise RuntimeError(f"生产依赖未就绪: {states}")
+    components = health.get("components") or {}
+    database = components.get("database") or {}
+    storage = components.get("storage") or {}
+    if database.get("backend") not in {"mysql", "postgresql"}:
+        raise RuntimeError("生产数据库不是 MySQL/PostgreSQL")
+    if not (
+        storage.get("status") == "ok"
+        and storage.get("backend") == "cos"
+        and storage.get("persistent") is True
+    ):
+        raise RuntimeError("生产私有 COS 未通过在线检查")
+    if (components.get("ai") or {}).get("status") != "ok":
+        raise RuntimeError("生产 AI 未就绪或仍为 demo")
+    if (components.get("feishu") or {}).get("status") != "ok":
+        raise RuntimeError("生产飞书免登未就绪")
 
     status, _, _ = request(base_url, "/api/me")
     if status != 401:

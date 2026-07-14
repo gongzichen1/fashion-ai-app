@@ -142,6 +142,45 @@ def test_user_data_isolation(tmp_path, monkeypatch):
     assert client.delete("/api/favorites/analysis-1").get_json()["deleted"] is False
 
 
+def test_last_reference_removal_deletes_orphaned_image(tmp_path, monkeypatch):
+    client = make_client(tmp_path, monkeypatch)
+    analyze = client.post(
+        "/api/analyze",
+        data={"image": (io.BytesIO(one_pixel_png()), "garment.png")},
+        content_type="multipart/form-data",
+    )
+    result = analyze.get_json()["data"]
+    result_id = result["id"]
+    image_path = tmp_path / "uploads" / result["imageKey"]
+    assert image_path.exists()
+
+    assert (
+        client.post("/api/favorites", json={"analysis_id": result_id}).status_code
+        == 201
+    )
+    assert (
+        client.post("/api/wardrobe", json={"analysis_id": result_id}).status_code == 201
+    )
+
+    deleted_result = client.delete(f"/api/result/{result_id}").get_json()
+    assert deleted_result == {
+        "success": True,
+        "deleted": True,
+        "imageRetained": True,
+    }
+    assert image_path.exists()
+
+    deleted_favorite = client.delete(f"/api/favorites/{result_id}").get_json()
+    assert deleted_favorite["deleted"] is True
+    assert deleted_favorite["imageDeleted"] is False
+    assert image_path.exists()
+
+    deleted_wardrobe = client.delete(f"/api/wardrobe/{result_id}").get_json()
+    assert deleted_wardrobe["deleted"] is True
+    assert deleted_wardrobe["imageDeleted"] is True
+    assert not image_path.exists()
+
+
 def test_analyze_reports_ai_failure_instead_of_fake_success(tmp_path, monkeypatch):
     class FailingAIService:
         def analyze_image(self, image_base64, style_preference=None):
