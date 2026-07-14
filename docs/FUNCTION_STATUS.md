@@ -73,7 +73,7 @@
 - 无文件扩展名但图片头合法的 PNG 上传可被接受。
 - 鉴权资源在退出后返回 401，两个开发账号的收藏数据互不可见且不能互删；
 - AI 失败返回 503、明确错误码和 requestId，不生成固定成功；
-- 本地后端 28 项通过、2 项真实 MySQL/PostgreSQL 集成测试因无本地服务跳过；飞书 H5 有 2 项 `ttfile` 转换测试通过，TypeScript/Vite 生产构建通过。GitHub Actions 已配置 PostgreSQL 16、MySQL 8.4、Docker 构建和部署后验证，需推送后取得远端运行证据。
+- 本地后端 28 项通过、2 项真实 MySQL/PostgreSQL 集成测试因无本地服务跳过；飞书 H5 有 2 项 `ttfile` 转换测试通过。GitHub Actions 已确认 Python 3.11 后端/H5/安全审计、PostgreSQL 16、MySQL 8.4 和 Docker 同源镜像构建全部通过；生产部署因尚未配置 Secret 而未执行。
 
 当前测试不能证明的范围：
 

@@ -29,9 +29,9 @@
 - Python 3.12 干净 `.venv` 下 28 项测试通过、2 项 MySQL/PostgreSQL 集成测试因本地无服务跳过；飞书 H5 的 `ttfile` 文件系统转换 2 项测试和生产构建通过。
 - 已用 `FileSystemManager.readFile` 替代对 `ttfile://` 的直接 fetch，并在媒体选择和分享前强制完成 JSSDK 鉴权。
 - 飞书 App ID 改为由后端 challenge 在运行时返回；同一镜像无需构建参数即可切换环境。
-- GitHub Actions 已替换假部署：增加后端/H5/安全审计、MySQL 8.4、PostgreSQL 16、Docker 构建、手动 CloudBase 部署及部署后验证；首次远端运行确认后端 28 项和 PostgreSQL 通过，已修复 isort 环境漂移与 MySQL 认证依赖，等待复验。
+- GitHub Actions 已替换假部署：第二次远端运行的后端/H5/安全审计、MySQL 8.4、PostgreSQL 16 和 Docker 同源镜像构建全部通过；手动 CloudBase 部署及部署后验证已就位。
 - 旧 CloudBase `/` 与 `/api/health` 已恢复快速 200；旧 `/api/analyze` 实测仍返回固定粉色裙子假结果，证明必须重新部署。
 
 ## Next Step
 
-- 准备飞书 App ID/Secret、H5 可信域名、托管 MySQL/PostgreSQL 连接串和 COS 私有桶配置，部署本轮镜像并按 `docs/FEISHU_ROADMAP.md` 执行双账号/双端验收。
+- 在 GitHub/CloudBase 配置部署凭据与生产环境；当前仓库 Actions Secret 和 production environment 均为空。随后准备飞书 App ID/Secret、H5 可信域名、托管数据库连接串和 COS 私有桶，部署本轮镜像并执行双账号/双端验收。

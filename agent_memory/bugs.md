@@ -12,8 +12,8 @@
 - COS adapter 已实现但未使用真实私有桶验证上传、鉴权代理读取、删除和权限策略。
 - 托管数据库尚未验证网络白名单、TLS、连接池、备份恢复、迁移回滚和并发免登。
 - 图片清理已有 CLI，但必须配置平台调度；仍需孤儿巡检、失败重试和账号注销流程。
-- 本机没有可用 Docker 命令，根目录镜像尚未本地构建验证。
-- GitHub Actions 已配置 Docker 和两种托管数据库测试，但当前提交尚未推送，不能把配置存在当成远端通过。
+- 本机没有可用 Docker 命令；根目录镜像已由 GitHub Actions 成功构建，但仍未使用生产配置启动并执行部署后验收。
+- GitHub 仓库当前没有任何 Actions Secret 或 production environment；无法触发 CloudBase 生产部署。
 - 真实模型视觉兼容性、延迟与错误率仍未在新部署环境验收。
 
 ## Failed Attempts
@@ -21,7 +21,7 @@
 - 旧 Python 3.9 venv 的二进制依赖受 macOS 安全策略影响；已改用根目录 Python 3.12 `.venv`。
 - 本机 `pip-audit` 在创建隔离临时 venv 时触发 macOS `SIGABRT`；不是依赖漏洞结论，安全审计必须以 GitHub Actions 的干净 Python 3.11 结果为准。
 - 本轮无法执行 Docker 镜像构建，因为当前环境未安装 Docker CLI；需由 CI/CloudBase 构建或安装 Docker 后复验。
-- 首次远端 CI 的 28 项后端测试和 PostgreSQL 集成测试通过；随后因 `isort` first-party 分类随环境漂移、MySQL 8.4 `caching_sha2_password` 缺少 `cryptography` 而失败，已定位并修复，等待第二次 CI 复验。
+- 首次远端 CI 的 28 项后端测试和 PostgreSQL 集成测试通过；随后因 `isort` first-party 分类随环境漂移、MySQL 8.4 `caching_sha2_password` 缺少 `cryptography` 而失败。两项均已修复，第二次 CI 的 verify、PostgreSQL/MySQL 和 Docker 构建全部通过。
 
 ## Follow-Up
 
