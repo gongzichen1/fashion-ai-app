@@ -4,12 +4,12 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "backend"))
 
-from api import routes
 from app import create_app
+
+from api import routes
+from config import Config
 from models.data_store import DataStore
 from services.ai_service import AIServiceError
-
-from config import Config
 
 
 class FakeAIService:

@@ -21,6 +21,7 @@
 - 旧 Python 3.9 venv 的二进制依赖受 macOS 安全策略影响；已改用根目录 Python 3.12 `.venv`。
 - 本机 `pip-audit` 在创建隔离临时 venv 时触发 macOS `SIGABRT`；不是依赖漏洞结论，安全审计必须以 GitHub Actions 的干净 Python 3.11 结果为准。
 - 本轮无法执行 Docker 镜像构建，因为当前环境未安装 Docker CLI；需由 CI/CloudBase 构建或安装 Docker 后复验。
+- 首次远端 CI 的 28 项后端测试和 PostgreSQL 集成测试通过；随后因 `isort` first-party 分类随环境漂移、MySQL 8.4 `caching_sha2_password` 缺少 `cryptography` 而失败，已定位并修复，等待第二次 CI 复验。
 
 ## Follow-Up
 

@@ -6,8 +6,9 @@ import os
 import uuid
 
 from colorthief import ColorThief
-from config.settings import Config
 from PIL import Image
+
+from config.settings import Config
 
 logger = logging.getLogger(__name__)
 

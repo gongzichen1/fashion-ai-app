@@ -6,6 +6,7 @@ import logging
 import re
 
 import requests
+
 from config.settings import Config
 
 logger = logging.getLogger(__name__)

@@ -12,6 +12,8 @@ from urllib.parse import urlparse
 
 import requests
 from flask import Blueprint, current_app, jsonify, request, session
+from sqlalchemy.exc import IntegrityError
+
 from models.data_store import db
 from services import AIService, ImageService
 from services.ai_service import AIServiceError
@@ -23,7 +25,6 @@ from services.auth_service import (
     WechatAuthService,
 )
 from services.object_storage import create_object_storage
-from sqlalchemy.exc import IntegrityError
 
 api_bp = Blueprint("api", __name__)
 ai_service = AIService()

@@ -12,12 +12,12 @@ from flask_cors import CORS
 load_dotenv()
 
 from api import api_bp
-from models.data_store import db
-from services.lifecycle_service import cleanup_expired_images
-from services.object_storage import create_object_storage
 
 # 导入配置和路由
 from config import Config, config
+from models.data_store import db
+from services.lifecycle_service import cleanup_expired_images
+from services.object_storage import create_object_storage
 
 
 def production_config_errors(settings, database_backend):
