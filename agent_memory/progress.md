@@ -26,10 +26,10 @@
 - 完成飞书 React/Vite 移动优先 H5：首页、媒体上传、结果、历史、收藏、衣橱、偏好和个人中心。
 - 完成统一后端认证、用户隔离资源 API、明确 AI 错误、分项 health、local/COS 存储和生命周期清理。
 - 微信小程序已接入后端微信登录与会话 Cookie，保留原核心流程。
-- Python 3.12 干净 `.venv` 下 42 项测试通过、2 项 MySQL/PostgreSQL 集成测试因本地无服务跳过；飞书 H5 的 `ttfile` 文件系统转换 2 项测试和生产构建通过；本轮增量远端 CI 待提交后复核。
+- Python 3.12 干净 `.venv` 下 42 项测试通过、2 项 MySQL/PostgreSQL 集成测试因本地无服务跳过；飞书 H5 的 `ttfile` 文件系统转换 2 项测试和生产构建通过。
 - 已用 `FileSystemManager.readFile` 替代对 `ttfile://` 的直接 fetch，并在媒体选择和分享前强制完成 JSSDK 鉴权。
 - 飞书 App ID 改为由后端 challenge 在运行时返回；同一镜像无需构建参数即可切换环境。
-- GitHub Actions 已替换假部署：提交 `f18ceb7` 的 37 项后端/H5/安全审计、MySQL 8.4、PostgreSQL 16 和 Docker 同源镜像构建全部通过；手动 CloudBase 部署及部署后验证已就位。
+- GitHub Actions 已替换假部署：提交 `3e9e0ad` 的 42 项后端/H5/安全审计、MySQL 8.4、PostgreSQL 16 和 Docker 同源镜像构建全部通过；手动 CloudBase 部署、CLI dry-run 及部署后验证已就位。
 - COS readiness 已改为真实 `head_bucket` 检查；删除分析后保留的图片会在收藏/衣橱最后一个引用移除时同步删除。
 - 新增 `scripts/verify_two_account_isolation.py`，可分别用移动端和桌面端的两个真实会话自动验证列表、ID、图片、收藏、衣橱、删除与最后引用生命周期。
 - 建立公共服装目录：`catalog_items` 内容哈希唯一索引、审核状态/品类索引、私有图片接口、推荐配图匹配、去重盘点与清单导入；旧上传目录 45 张得到 18 个唯一内容、6 个测试资产和 12 个待授权候选，自动批准 0 张。

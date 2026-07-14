@@ -74,7 +74,7 @@
 - 无文件扩展名但图片头合法的 PNG 上传可被接受。
 - 鉴权资源在退出后返回 401，两个开发账号的收藏数据互不可见且不能互删；
 - AI 失败返回 503、明确错误码和 requestId，不生成固定成功；
-- 本地后端 42 项通过、2 项真实 MySQL/PostgreSQL 集成测试因无本地服务跳过；新增生产依赖硬校验、COS 在线/写入检查、临时文件清理、数据库结构、双账号验收和服装目录测试。提交 `f18ceb7` 的 GitHub Actions 已确认此前 Python 3.11 后端/H5/安全审计、PostgreSQL 16、MySQL 8.4 和 Docker 同源镜像全部通过；本轮 readiness/preflight 增量 CI 待提交后复核。
+- 本地后端 42 项通过、2 项真实 MySQL/PostgreSQL 集成测试因无本地服务跳过；新增生产依赖硬校验、COS 在线/写入检查、临时文件清理、数据库结构、双账号验收和服装目录测试。提交 `3e9e0ad` 的 GitHub Actions 已确认 Python 3.11 后端/H5/安全审计、PostgreSQL 16、MySQL 8.4 和 Docker 同源镜像全部通过。
 
 当前测试不能证明的范围：
 
