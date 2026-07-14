@@ -238,8 +238,12 @@ const API_BASE_URL = 'http://localhost:5001/api'; // 开发环境
 
 #### 健康检查
 ```http
+GET /api/live
+GET /api/ready
 GET /api/health
 ```
+
+`/api/live` 只验证进程存活；`/api/ready` 在数据库结构、COS、AI 或飞书配置未就绪时返回 503；`/api/health` 始终返回分项诊断与布尔 `ready`。生产变量清单见 `config/production.env.example`，真实值只能通过平台密钥配置注入。
 
 #### 服装分析
 ```http

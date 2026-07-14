@@ -42,6 +42,12 @@ INDEXED_FIELDS = {
     },
 }
 
+BASE_COLUMNS = {"id", "owner_user_id", "payload", "created_at", "updated_at"}
+REQUIRED_COLUMNS = {
+    collection: BASE_COLUMNS | INDEXED_FIELDS.get(collection, set())
+    for collection in COLLECTIONS
+}
+
 
 class DataStore:
     """小型关系型存储层；JSON payload 保留现有前端字段兼容性。"""
@@ -270,6 +276,29 @@ class DataStore:
                 return connection.exec_driver_sql("SELECT 1").scalar_one() == 1
         except Exception:
             return False
+
+    def health(self):
+        """检查连接与当前代码依赖的表结构，不返回连接串或异常原文。"""
+        if not self.ping():
+            return {"status": "error", "backend": self.backend, "schema": "unknown"}
+        try:
+            inspector = inspect(self.engine)
+            tables = set(inspector.get_table_names())
+            if not COLLECTIONS <= tables:
+                return {"status": "error", "backend": self.backend, "schema": "error"}
+            for collection, required in REQUIRED_COLUMNS.items():
+                columns = {
+                    column["name"] for column in inspector.get_columns(collection)
+                }
+                if not required <= columns:
+                    return {
+                        "status": "error",
+                        "backend": self.backend,
+                        "schema": "error",
+                    }
+        except Exception:
+            return {"status": "error", "backend": self.backend, "schema": "unknown"}
+        return {"status": "ok", "backend": self.backend, "schema": "ok"}
 
     def scan(self, collection: str) -> list:
         """后台维护任务使用的全量扫描；在线列表接口仍必须分页。"""

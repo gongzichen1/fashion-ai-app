@@ -31,6 +31,16 @@ def verify_once(base_url):
     if status != 200 or b'<div id="root"></div>' not in body:
         raise RuntimeError("根路径未返回飞书 H5 构建产物")
 
+    status, _, body = request(base_url, "/api/live")
+    live = decode_json(body, "liveness")
+    if status != 200 or live.get("status") != "alive":
+        raise RuntimeError("liveness 接口不可用")
+
+    status, _, body = request(base_url, "/api/ready")
+    ready_payload = decode_json(body, "readiness")
+    if status != 200 or ready_payload.get("ready") is not True:
+        raise RuntimeError("readiness 接口未就绪")
+
     status, _, body = request(base_url, "/api/health")
     health = decode_json(body, "health")
     if status != 200 or not health.get("success"):
@@ -46,6 +56,8 @@ def verify_once(base_url):
     storage = components.get("storage") or {}
     if database.get("backend") not in {"mysql", "postgresql"}:
         raise RuntimeError("生产数据库不是 MySQL/PostgreSQL")
+    if database.get("schema") != "ok":
+        raise RuntimeError("生产数据库结构未就绪")
     if not (
         storage.get("status") == "ok"
         and storage.get("backend") == "cos"

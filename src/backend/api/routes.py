@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 import secrets
+import tempfile
 import time
 import uuid
 from datetime import datetime
@@ -243,8 +244,22 @@ def jsapi_config():
 
 @api_bp.get("/health")
 def health_check():
+    return _readiness_response(always_ok=True)
+
+
+@api_bp.get("/live")
+def liveness_check():
+    return jsonify({"success": True, "status": "alive"})
+
+
+@api_bp.get("/ready")
+def readiness_check():
+    return _readiness_response(always_ok=False)
+
+
+def _readiness_response(always_ok):
     components = {
-        "database": {"status": "ok" if db.ping() else "error", "backend": db.backend},
+        "database": db.health(),
         "storage": create_object_storage(current_app.config).health(),
         "ai": {
             "status": (
@@ -261,14 +276,14 @@ def health_check():
     ready = all(
         item["status"] in {"ok", "demo", "disabled"} for item in components.values()
     )
-    return jsonify(
-        {
-            "success": True,
-            "status": "ready" if ready else "degraded",
-            "components": components,
-            "timestamp": datetime.now().isoformat(),
-        }
-    )
+    payload = {
+        "success": True,
+        "ready": ready,
+        "status": "ready" if ready else "degraded",
+        "components": components,
+        "timestamp": datetime.now().isoformat(),
+    }
+    return jsonify(payload), 200 if ready or always_ok else 503
 
 
 @api_bp.post("/analyze")
@@ -276,6 +291,9 @@ def health_check():
 def analyze_image():
     request_id = uuid.uuid4().hex
     filename = None
+    filepath = None
+    object_created = False
+    storage = create_object_storage(current_app.config)
     try:
         style_preference = _style_preference()
         if "image" in request.files:
@@ -286,13 +304,16 @@ def analyze_image():
             filename = (
                 f"{_current_user_id()}/{uuid.uuid4().hex}_{int(time.time())}.{ext}"
             )
-            os.makedirs(
-                os.path.dirname(
-                    os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
-                ),
-                exist_ok=True,
+            work_folder = (
+                current_app.config["UPLOAD_FOLDER"]
+                if storage.backend == "local"
+                else tempfile.gettempdir()
             )
-            filepath = ImageService.save_image(file, filename)
+            work_name = (
+                filename if storage.backend == "local" else os.path.basename(filename)
+            )
+            filepath = ImageService.save_image(file, work_name, work_folder)
+            object_created = storage.backend == "local"
             ImageService.resize_image(filepath)
             image_base64 = ImageService.image_to_base64(filepath)
         elif request.is_json and (request.get_json(silent=True) or {}).get(
@@ -300,13 +321,16 @@ def analyze_image():
         ):
             image_base64 = request.get_json()["image_base64"]
             filename = f"{_current_user_id()}/{uuid.uuid4().hex}_{int(time.time())}.jpg"
-            os.makedirs(
-                os.path.dirname(
-                    os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
-                ),
-                exist_ok=True,
+            work_folder = (
+                current_app.config["UPLOAD_FOLDER"]
+                if storage.backend == "local"
+                else tempfile.gettempdir()
             )
-            filepath = ImageService.save_image(image_base64, filename)
+            work_name = (
+                filename if storage.backend == "local" else os.path.basename(filename)
+            )
+            filepath = ImageService.save_image(image_base64, work_name, work_folder)
+            object_created = storage.backend == "local"
         else:
             return _error("请上传图片", 400, "IMAGE_REQUIRED", request_id)
 
@@ -318,8 +342,8 @@ def analyze_image():
             )
         except (IndexError, TypeError, ValueError):
             primary_color = analysis.get("primary_color", "")
-        storage = create_object_storage(current_app.config)
         storage.upload(filepath, filename)
+        object_created = True
         result = {
             "id": uuid.uuid4().hex,
             "owner_user_id": _current_user_id(),
@@ -345,11 +369,6 @@ def analyze_image():
             ),
         }
         db.insert("results", result.copy())
-        if storage.backend != "local":
-            try:
-                os.remove(filepath)
-            except FileNotFoundError:
-                pass
         return jsonify(
             {
                 "success": True,
@@ -359,21 +378,27 @@ def analyze_image():
             }
         )
     except AIServiceError as exc:
-        if filename:
-            create_object_storage(current_app.config).delete(filename)
+        if object_created and filename:
+            storage.delete(filename)
         current_app.logger.warning("AI 分析失败 request_id=%s code=%s", request_id, exc)
         code = str(exc)
         return _error("AI 服务暂时不可用", 503, code, request_id)
     except Exception:
-        if filename:
+        if object_created and filename:
             try:
-                create_object_storage(current_app.config).delete(filename)
+                storage.delete(filename)
             except Exception:
                 current_app.logger.exception(
                     "清理失败上传 request_id=%s key=%s", request_id, filename
                 )
         current_app.logger.exception("分析错误 request_id=%s", request_id)
         return _error("分析失败", 500, "ANALYSIS_FAILED", request_id)
+    finally:
+        if storage.backend != "local" and filepath:
+            try:
+                os.remove(filepath)
+            except FileNotFoundError:
+                pass
 
 
 @api_bp.get("/result/<result_id>")

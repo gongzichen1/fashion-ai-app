@@ -13,6 +13,9 @@ from services.ai_service import AIServiceError
 
 
 class FakeAIService:
+    def _configured(self):
+        return True
+
     def analyze_image(self, image_base64, style_preference=None):
         return {
             "garment_type": "针织衫",
@@ -252,6 +255,61 @@ def test_analyze_reports_ai_failure_instead_of_fake_success(tmp_path, monkeypatc
     assert body["success"] is False
     assert body["error"]["code"] == "AI_ANALYSIS_FAILED"
     assert body["requestId"]
+
+
+def test_cos_upload_uses_ephemeral_file_and_always_removes_it(tmp_path, monkeypatch):
+    class FakeCosStorage:
+        backend = "cos"
+
+        def __init__(self):
+            self.local_path = None
+            self.uploaded = None
+
+        def upload(self, local_path, key):
+            self.local_path = local_path
+            self.uploaded = (key, open(local_path, "rb").read())
+
+        def url_for(self, key):
+            return f"/uploads/{key}"
+
+        def delete(self, key):
+            return True
+
+    storage = FakeCosStorage()
+    work_dir = tmp_path / "ephemeral"
+    monkeypatch.setattr(routes, "create_object_storage", lambda config: storage)
+    monkeypatch.setattr(routes.tempfile, "gettempdir", lambda: str(work_dir))
+    client = make_client(tmp_path, monkeypatch)
+
+    response = client.post(
+        "/api/analyze",
+        data={"image": (io.BytesIO(one_pixel_png()), "garment.png")},
+        content_type="multipart/form-data",
+    )
+
+    assert response.status_code == 200
+    assert storage.uploaded[0].startswith(
+        response.get_json()["data"]["owner_user_id"] + "/"
+    )
+    assert storage.uploaded[1]
+    assert storage.local_path.startswith(str(work_dir))
+    assert not os.path.exists(storage.local_path)
+
+
+def test_health_exposes_liveness_and_machine_readiness(tmp_path, monkeypatch):
+    client = make_client(tmp_path, monkeypatch)
+
+    live = client.get("/api/live")
+    health = client.get("/api/health")
+    ready = client.get("/api/ready")
+
+    assert live.status_code == 200
+    assert live.get_json()["status"] == "alive"
+    assert health.status_code == 200
+    assert health.get_json()["ready"] is False
+    assert ready.status_code == 503
+    assert ready.get_json()["ready"] is False
+    assert health.get_json()["components"]["database"]["schema"] == "ok"
 
 
 def test_auth_required(tmp_path, monkeypatch):

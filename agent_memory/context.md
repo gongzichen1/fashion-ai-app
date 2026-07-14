@@ -26,6 +26,7 @@
 - 原图默认保留 30 天；收藏或衣橱引用可转为长期资产。
 - AI 失败不再静默返回假结果；仅显式开发配置可启用 demo mode。
 - 公共服装目录 `catalog_items` 与用户 `wardrobe_items` 完全分离；只有完成授权和核心标签复核的 `approved` 目录图片才能通过登录鉴权接口进入推荐配图。
+- 运维接口拆分为无外部依赖的 `/api/live`、失败返回 503 的 `/api/ready` 和始终返回分项诊断的 `/api/health`；发布前使用显式写入探针验证数据库事务和 COS 写读删。
 
 ## Useful Commands
 

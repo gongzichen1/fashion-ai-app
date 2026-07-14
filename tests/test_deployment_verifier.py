@@ -14,12 +14,20 @@ def response_for(backend="postgresql"):
         assert base_url == "https://fashion.example.com"
         if path == "/":
             return 200, {}, b'<div id="root"></div>'
+        if path == "/api/live":
+            return 200, {}, b'{"success":true,"status":"alive"}'
+        if path == "/api/ready":
+            return 200, {}, b'{"success":true,"ready":true,"status":"ready"}'
         if path == "/api/health":
             body = {
                 "success": True,
                 "ready": True,
                 "components": {
-                    "database": {"status": "ok", "backend": backend},
+                    "database": {
+                        "status": "ok",
+                        "backend": backend,
+                        "schema": "ok",
+                    },
                     "storage": {
                         "status": "ok",
                         "backend": "cos",

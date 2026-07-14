@@ -20,6 +20,7 @@ from models.data_store import db
 from services.catalog_service import import_catalog_directory
 from services.lifecycle_service import cleanup_expired_images
 from services.object_storage import create_object_storage
+from services.runtime_readiness import verify_database_write, verify_storage_write
 
 
 def production_config_errors(settings, database_backend):
@@ -108,6 +109,34 @@ def create_app(config_name="default"):
             "scanned={scanned} deleted={deleted} retained={retained} failed={failed}".format(
                 **stats
             )
+        )
+
+    @app.cli.command("production-preflight")
+    @click.option(
+        "--write-probes",
+        is_flag=True,
+        help="在回滚事务和 healthchecks/ 前缀验证数据库/COS 写读删",
+    )
+    def production_preflight_command(write_probes):
+        """发布前检查数据库结构、存储连通性和可选写入权限。"""
+        database = db.health()
+        storage = create_object_storage(app.config)
+        storage_health = storage.health()
+        if database.get("status") != "ok" or database.get("schema") != "ok":
+            raise click.ClickException("数据库连接或表结构未就绪")
+        if storage_health.get("status") != "ok":
+            raise click.ClickException("对象存储未就绪")
+        database_write = storage_write = "skipped"
+        if write_probes:
+            database_write = "ok" if verify_database_write(db) else "error"
+            storage_write = "ok" if verify_storage_write(storage) else "error"
+            if "error" in {database_write, storage_write}:
+                raise click.ClickException("数据库或对象存储写入探针失败")
+        click.echo(
+            "production_preflight_ok "
+            f"database={database.get('backend')} schema=ok "
+            f"storage={storage_health.get('backend')} "
+            f"database_write={database_write} storage_write={storage_write}"
         )
 
     @app.cli.command("catalog-import")

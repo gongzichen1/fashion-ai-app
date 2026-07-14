@@ -27,7 +27,7 @@ class ImageService:
         )
 
     @staticmethod
-    def save_image(image_data, filename: str = None) -> str:
+    def save_image(image_data, filename: str = None, upload_folder: str = None) -> str:
         """
         保存图片到服务器
 
@@ -38,13 +38,15 @@ class ImageService:
         Returns:
             保存的文件路径
         """
-        if not os.path.exists(Config.UPLOAD_FOLDER):
-            os.makedirs(Config.UPLOAD_FOLDER)
+        upload_folder = upload_folder or Config.UPLOAD_FOLDER
+        if not os.path.exists(upload_folder):
+            os.makedirs(upload_folder)
 
         if not filename:
             filename = f"{uuid.uuid4().hex}.jpg"
 
-        filepath = os.path.join(Config.UPLOAD_FOLDER, filename)
+        filepath = os.path.join(upload_folder, filename)
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
 
         if isinstance(image_data, str):
             # base64字符串

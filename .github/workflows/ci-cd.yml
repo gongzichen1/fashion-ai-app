@@ -153,8 +153,9 @@ jobs:
           TCB_ENV_ID: ${{ secrets.TCB_ENV_ID }}
           TCB_SERVICE_NAME: ${{ secrets.TCB_SERVICE_NAME }}
         run: |
-          npm install --global @cloudbase/cli@latest
+          npm install --global @cloudbase/cli@3
           tcb login --apiKeyId "$TCB_SECRET_ID" --apiKey "$TCB_SECRET_KEY"
+          tcb cloudrun deploy -e "$TCB_ENV_ID" -s "$TCB_SERVICE_NAME" --port 5001 --dry-run
           tcb cloudrun deploy -e "$TCB_ENV_ID" -s "$TCB_SERVICE_NAME" --port 5001 --force
 
       - name: Verify production deployment

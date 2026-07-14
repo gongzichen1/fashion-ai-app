@@ -49,7 +49,7 @@ JSSDK 流程：
 - 原始上传默认保留 30 天。删除分析时：无长期引用则删除对象；收藏/衣橱长期引用需要用户显式确认并更新引用。
 - `POST /api/analyze` 强制认证，返回 `requestId` 和稳定错误码；生产禁用静默 demo 结果。
 - 用户资源接口统一分页、所有权校验、幂等删除和脱敏日志。
-- `/api/health` 拆分 liveness/readiness，展示数据库、对象存储和 AI 配置状态但不泄露密钥。
+- [x] `/api/health` 已拆分为 `/api/live`、`/api/ready` 和分项 health；数据库结构缺失或外部依赖异常会阻止 readiness，但不泄露密钥。
 
 ### 阶段 1B：飞书 H5 MVP
 
@@ -123,6 +123,7 @@ JSSDK 流程：
 
 - [ ] 创建托管 MySQL 或 PostgreSQL 数据库与独立业务账号，仅授予目标库权限；
 - [ ] 将连接串以 `DATABASE_URL` 注入 CloudBase 密钥环境，禁止写入镜像、仓库和前端；
+- [ ] 使用 `config/production.env.example` 逐项配置后执行 `production-preflight --write-probes`；数据库事务或 COS 写读删任一失败即停止；
 - [ ] 首次发布前备份现有 SQLite，执行用户身份迁移并验证同一飞书账号不会产生重复用户；
 - [ ] 配置自动备份、恢复演练、连接数告警和数据库访问白名单；
 - [ ] 在飞书开放平台创建企业自建应用，取得 `app_id`/`app_secret`，通过密钥管理注入后端；

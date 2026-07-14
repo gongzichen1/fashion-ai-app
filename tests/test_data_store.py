@@ -50,3 +50,18 @@ def test_existing_sqlite_users_are_migrated_to_unique_external_identity(tmp_path
     assert user["id"] == "user-1"
     assert user["name"] == "旧用户"
     assert store.backend == "sqlite"
+
+
+def test_database_health_checks_required_schema(tmp_path):
+    store = DataStore(str(tmp_path))
+
+    assert store.health() == {"status": "ok", "backend": "sqlite", "schema": "ok"}
+
+    with store.engine.begin() as connection:
+        connection.exec_driver_sql("DROP TABLE feedback")
+
+    assert store.health() == {
+        "status": "error",
+        "backend": "sqlite",
+        "schema": "error",
+    }

@@ -37,6 +37,13 @@ CORS_ORIGINS=https://<同源业务域名>
 ```
 
 图片还需配置私有 COS；AI provider 参数见 `src/backend/.env.example`。
+完整无密钥模板见 `config/production.env.example`。配置完成后，在与生产相同的容器环境执行：
+
+```bash
+FLASK_ENV=production flask --app app production-preflight --write-probes
+```
+
+该命令检查所有业务表与必要列，在回滚事务中验证数据库写入，并在 COS 的 `healthchecks/` 前缀完成一次随机对象写、读、删；不输出连接串、密钥或 provider 异常原文。未输出 `production_preflight_ok` 时停止发布。
 
 ## 4. 上线验收
 
@@ -44,7 +51,7 @@ CORS_ORIGINS=https://<同源业务域名>
 2. 同一账号重复登录，确认只产生一个 `users` 记录。
 3. A/B 分别创建分析、收藏和衣橱；互查 ID、列表、图片和删除全部返回不可见。
 4. 容器重启和多实例切换后，登录与数据仍存在。
-5. 数据库断开时 `/api/health` 的 database 状态为 error，业务发布立即停止。
+5. 数据库断开或结构缺失时 `/api/ready` 返回 503，`/api/health` 的 database 状态为 error，业务发布立即停止。
 6. 执行数据库备份与恢复演练，记录恢复时间和回滚负责人。
 
 当前代码已完成上述身份映射和隔离逻辑，但真实托管数据库、真实飞书凭据及双账号验收仍属于部署动作，未完成前不能标记正式上线。
