@@ -7,6 +7,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "backend
 from api import routes
 from app import create_app
 from models.data_store import DataStore
+from services.ai_service import AIServiceError
 
 from config import Config
 
@@ -69,7 +70,10 @@ def make_client(tmp_path, monkeypatch):
     upload_dir.mkdir()
     monkeypatch.setattr(Config, "UPLOAD_FOLDER", str(upload_dir))
     app = create_app("testing")
-    return app.test_client()
+    client = app.test_client()
+    login = client.post("/api/auth/dev-login", json={"userId": "smoke-user"})
+    assert login.status_code == 200
+    return client
 
 
 def one_pixel_png():
@@ -101,7 +105,8 @@ def test_analyze_result_and_history(tmp_path, monkeypatch):
         data={
             "image": (io.BytesIO(one_pixel_png()), "camera-temp"),
             "style_preference": (
-                '{"preferred_styles":["温柔"],' '"common_scenes":["日常"],"budget":"中等"}'
+                '{"preferred_styles":["温柔"],'
+                '"common_scenes":["日常"],"budget":"中等"}'
             ),
         },
         content_type="multipart/form-data",
@@ -118,3 +123,110 @@ def test_analyze_result_and_history(tmp_path, monkeypatch):
     history = client.get("/api/history")
     assert history.status_code == 200
     assert history.get_json()["data"][0]["id"] == result_id
+
+
+def test_user_data_isolation(tmp_path, monkeypatch):
+    client = make_client(tmp_path, monkeypatch)
+    user_id = client.get("/api/me").get_json()["data"]["id"]
+    routes.db.insert(
+        "results",
+        {"id": "analysis-1", "owner_user_id": user_id, "image": "/uploads/a.png"},
+    )
+    created = client.post("/api/favorites", json={"analysis_id": "analysis-1"})
+    assert created.status_code == 201
+    assert created.get_json()["data"]["image"] == "/uploads/a.png"
+
+    client.post("/api/auth/logout")
+    client.post("/api/auth/dev-login", json={"userId": "another-user"})
+    assert client.get("/api/favorites").get_json()["data"] == []
+    assert client.delete("/api/favorites/analysis-1").get_json()["deleted"] is False
+
+
+def test_analyze_reports_ai_failure_instead_of_fake_success(tmp_path, monkeypatch):
+    class FailingAIService:
+        def analyze_image(self, image_base64, style_preference=None):
+            raise AIServiceError("AI_ANALYSIS_FAILED")
+
+    client = make_client(tmp_path, monkeypatch)
+    monkeypatch.setattr(routes, "ai_service", FailingAIService())
+    response = client.post(
+        "/api/analyze",
+        data={"image": (io.BytesIO(one_pixel_png()), "garment.png")},
+        content_type="multipart/form-data",
+    )
+    assert response.status_code == 503
+    body = response.get_json()
+    assert body["success"] is False
+    assert body["error"]["code"] == "AI_ANALYSIS_FAILED"
+    assert body["requestId"]
+
+
+def test_auth_required(tmp_path, monkeypatch):
+    client = make_client(tmp_path, monkeypatch)
+    client.post("/api/auth/logout")
+    assert client.get("/api/history").status_code == 401
+
+
+def test_uploaded_image_requires_owner_session(tmp_path, monkeypatch):
+    client = make_client(tmp_path, monkeypatch)
+    response = client.post(
+        "/api/analyze",
+        data={"image": (io.BytesIO(one_pixel_png()), "garment.png")},
+        content_type="multipart/form-data",
+    )
+    image_url = response.get_json()["data"]["image"]
+
+    assert client.get(image_url).status_code == 200
+    client.post("/api/auth/logout")
+    assert client.get(image_url).status_code == 404
+
+
+def test_same_origin_web_build_and_deep_link(tmp_path):
+    web_dist = tmp_path / "web-dist"
+    web_dist.mkdir()
+    (web_dist / "index.html").write_text("<h1>智搭飞书版</h1>", encoding="utf-8")
+    app = create_app("testing")
+    app.config["WEB_DIST_DIR"] = str(web_dist)
+    client = app.test_client()
+
+    assert "智搭飞书版" in client.get("/").get_data(as_text=True)
+    assert "智搭飞书版" in client.get("/shared/result-id").get_data(as_text=True)
+
+
+def test_wechat_login_creates_session_without_leaking_provider_error(
+    tmp_path, monkeypatch
+):
+    class FakeWechatAuth:
+        def exchange_code(self, code):
+            assert code == "wx-code"
+            return {
+                "external_id": "wechat:open-id",
+                "provider": "wechat",
+                "open_id": "open-id",
+                "name": "微信用户",
+                "avatar_url": "",
+            }
+
+    monkeypatch.setattr(routes, "db", DataStore(str(tmp_path)))
+    monkeypatch.setattr(routes, "_wechat_auth_service", lambda: FakeWechatAuth())
+    app = create_app("testing")
+    client = app.test_client()
+    login = client.post("/api/auth/wechat/login", json={"code": "wx-code"})
+    assert login.status_code == 200
+    assert client.get("/api/history").status_code == 200
+
+
+def test_wechat_login_error_is_sanitized(tmp_path, monkeypatch):
+    from services.auth_service import WechatAuthError
+
+    class FailingWechatAuth:
+        def exchange_code(self, code):
+            raise WechatAuthError("upstream secret detail")
+
+    monkeypatch.setattr(routes, "db", DataStore(str(tmp_path)))
+    monkeypatch.setattr(routes, "_wechat_auth_service", lambda: FailingWechatAuth())
+    app = create_app("testing")
+    response = app.test_client().post("/api/auth/wechat/login", json={"code": "bad"})
+    assert response.status_code == 401
+    assert response.get_json()["error"]["code"] == "WECHAT_LOGIN_FAILED"
+    assert "secret detail" not in response.get_data(as_text=True)

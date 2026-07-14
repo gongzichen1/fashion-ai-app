@@ -2,31 +2,32 @@
 
 ## Current Goal
 
-- 上线前验证与发布准备。
+- 将智搭整理为“微信小程序保留 + 飞书 H5 + Flask 统一 API”的企业内部可用平台，并完成真实飞书、外部数据库、COS 与 AI 的发布验收。
 
 ## Project Facts
 
-- 项目是微信小程序 + Flask 后端的穿搭 AI 应用。
-- 前端目录：`src/frontend`。
-- 后端目录：`src/backend`。
-- 本地旧 venv：`src/backend/venv`，Python 3.9.6，仅适合当前本地回归，不适合作为上线环境。
-- CloudBase 云托管公网域名：`https://zhida-api-264856-5-1259394189.sh.run.tcloudbase.com`。
-- AI 服务已改为 OpenAI 兼容接口配置，通过 `AI_API_URL`、`AI_API_KEY`、`AI_MODEL`、`AI_TIMEOUT` 环境变量读取。
+- 微信小程序：`src/frontend`；飞书 H5：`src/feishu-web`；统一后端：`src/backend`。
+- H5 构建产物可由 Flask 同源提供，根目录 `Dockerfile` 负责 Node 构建和 Python 运行时组装。
+- 后端已实现飞书 OAuth v2、微信 jscode2session、同源会话、SQLite 用户隔离、local/COS 图片存储适配器和图片到期清理 CLI。
+- CloudBase 旧版本公网域名：`https://zhida-api-264856-5-1259394189.sh.run.tcloudbase.com`；旧线上 `/api/analyze` 仍会返回固定假结果，必须部署本轮代码后复验。
 
 ## Constraints
 
-- 默认最小改动，不做无关重构。
-- 上线前配置必须由用户确认，包括 HTTPS API 域名、微信合法域名、生产 `.env`、模型 API Key 和真机预览结果。
+- 企业内部飞书自建 H5 为一期范围；不含虚拟试衣、虚假商品价格或购买链接。
+- SQLite 与本地上传目录只用于本地/单实例 MVP；生产多实例必须使用外部数据库和私有 COS。
+- 密钥只允许通过平台环境变量或密钥管理注入，不写入仓库。
 
 ## Decisions
 
-- 生产后端应使用 Python 3.10+ 重建 venv。
-- 已将 `src/frontend/config/index.js` 切换到 CloudBase HTTPS API 地址。
-- 用户明确统一使用 `https://agione.cc/hyperone/xapi/api` 和模型 `minimax/minimax-m2.7/b1d92`；密钥只应配置在 CloudBase 环境变量中，不写入仓库文件。
+- 普通浏览器生产环境不开放开发登录；飞书 JSSDK 失败需显示真实错误。
+- 所有业务资源按 `owner_user_id` 强制过滤；图片由同源鉴权代理读取。
+- 原图默认保留 30 天；收藏或衣橱引用可转为长期资产。
+- AI 失败不再静默返回假结果；仅显式开发配置可启用 demo mode。
 
 ## Useful Commands
 
-- `src/backend/venv/bin/python -m pytest -q`
-- `src/backend/venv/bin/python -m black --check src/backend tests`
-- `src/backend/venv/bin/python -m isort --check-only src/backend tests`
-- `src/backend/venv/bin/python -m flake8 src/backend tests --exclude=src/backend/venv --count --select=E9,F63,F7,F82 --show-source --statistics`
+- `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 .venv/bin/python -m pytest -q`
+- `.venv/bin/python -m black --check src/backend tests`
+- `.venv/bin/python -m isort --check-only src/backend tests`
+- `cd src/feishu-web && npm run build`
+- `FLASK_APP=src.backend.app .venv/bin/flask cleanup-expired-images`

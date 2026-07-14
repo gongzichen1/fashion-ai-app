@@ -178,7 +178,8 @@ Page({
   },
 
   // 上传并分析图片
-  uploadAndAnalyze(imagePath) {
+  async uploadAndAnalyze(imagePath) {
+    await app.ensureBackendLogin();
     return new Promise((resolve, reject) => {
       wx.showLoading({ title: 'AI分析中...' });
 
@@ -192,6 +193,7 @@ Page({
         url: `${app.globalData.apiBaseUrl}/analyze`,
         filePath: imagePath,
         name: 'image',
+        header: app.requestHeaders(),
         formData: formData,
         success: (res) => {
           wx.hideLoading();

@@ -45,7 +45,7 @@ Page({
   },
 
   // 从服务器加载数据
-  loadFromServer(id) {
+  async loadFromServer(id) {
     const localResult = app.findHistoryById(id);
     if (localResult) {
       const result = this.normalizeResult(localResult);
@@ -58,8 +58,17 @@ Page({
       return;
     }
 
+    try {
+      await app.ensureBackendLogin();
+    } catch (error) {
+      console.error('服务端登录失败:', error);
+      this.showLoadFailed();
+      return;
+    }
+
     wx.request({
       url: `${app.globalData.apiBaseUrl}/result/${id}`,
+      header: app.requestHeaders(),
       success: (res) => {
         if (res.data.success) {
           const result = this.normalizeResult(res.data.data);

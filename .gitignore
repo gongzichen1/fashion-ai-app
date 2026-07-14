@@ -58,5 +58,8 @@ npm-debug.log*
 *.tmp
 *.temp
 
+# Archived source packages (local preservation only)
+archive/source-assets/*.zip
+
 # Uploads (runtime generated)
 src/backend/uploads/*

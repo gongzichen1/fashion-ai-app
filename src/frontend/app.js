@@ -6,7 +6,10 @@ App({
     userInfo: null,
     apiBaseUrl: API_BASE_URL,
     uploadHistory: [],
-    collectList: []
+    collectList: [],
+    backendUser: null,
+    sessionCookie: '',
+    authReady: null
   },
 
   onLaunch() {
@@ -15,6 +18,74 @@ App({
     // 获取本地存储的历史记录
     this.loadHistory();
     this.loadCollects();
+    this.globalData.sessionCookie = wx.getStorageSync('backendSessionCookie') || '';
+    this.ensureBackendLogin().catch((error) => {
+      console.warn('后端会话初始化失败，将在使用核心功能时重试:', error);
+    });
+  },
+
+  loginBackend() {
+    return new Promise((resolve, reject) => {
+      wx.login({
+        success: (loginResult) => {
+          if (!loginResult.code) {
+            reject(new Error('微信登录未返回授权码'));
+            return;
+          }
+          wx.request({
+            url: `${this.globalData.apiBaseUrl}/auth/wechat/login`,
+            method: 'POST',
+            data: { code: loginResult.code },
+            header: { 'Content-Type': 'application/json' },
+            success: (res) => {
+              if (res.statusCode !== 200 || !res.data || !res.data.success) {
+                reject(new Error((res.data && res.data.message) || '服务端登录失败'));
+                return;
+              }
+              const sessionCookie = this.extractSessionCookie(res);
+              if (!sessionCookie) {
+                reject(new Error('服务端未返回会话 Cookie'));
+                return;
+              }
+              this.globalData.sessionCookie = sessionCookie;
+              this.globalData.backendUser = res.data.data;
+              wx.setStorageSync('backendSessionCookie', sessionCookie);
+              resolve(res.data.data);
+            },
+            fail: reject
+          });
+        },
+        fail: reject
+      });
+    });
+  },
+
+  extractSessionCookie(response) {
+    const responseCookies = Array.isArray(response.cookies) ? response.cookies : [];
+    const headers = response.header || {};
+    const setCookie = headers['Set-Cookie'] || headers['set-cookie'];
+    const rawCookies = responseCookies.length
+      ? responseCookies
+      : (Array.isArray(setCookie) ? setCookie : (setCookie ? [setCookie] : []));
+    return rawCookies.map(cookie => String(cookie).split(';')[0]).filter(Boolean).join('; ');
+  },
+
+  ensureBackendLogin() {
+    if (this.globalData.authReady) {
+      return this.globalData.authReady;
+    }
+    this.globalData.authReady = this.loginBackend().catch((error) => {
+      this.globalData.authReady = null;
+      throw error;
+    });
+    return this.globalData.authReady;
+  },
+
+  requestHeaders(extra = {}) {
+    return {
+      ...extra,
+      Cookie: this.globalData.sessionCookie
+    };
   },
 
   checkLoginStatus() {

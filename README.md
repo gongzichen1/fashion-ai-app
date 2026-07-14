@@ -7,6 +7,15 @@
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 > 🚀 一个基于大模型视觉分析的智能穿搭推荐微信小程序，通过AI图像分析为用户提供个性化服装搭配建议
 
+## 当前状态（2026-07-14）
+
+- `src/frontend`：保留的微信小程序前端，已补 `wx.login` 服务端会话接入，仍需真实 AppID/Secret 真机复验。
+- `src/feishu-web`：新增的飞书自建 H5 前端，支持免登、拍照/相册、分析、历史、收藏、衣橱和偏好。
+- `src/backend`：统一 Flask API，业务数据按用户隔离；AI 未配置或失败时返回明确错误，不再静默伪造结果。
+- 本地默认 SQLite 与本地图片存储只适合单实例 MVP；COS 适配器已实现但尚未使用真实凭据验收，多实例生产发布仍需接入外部数据库。
+
+项目真实能力、缺陷和发布边界以 [项目概况](docs/PROJECT_OVERVIEW.md)、[功能状态](docs/FUNCTION_STATUS.md)、[缺陷清单](docs/DEFECTS.md) 与 [飞书路线](docs/FEISHU_ROADMAP.md) 为准。
+
 ## ✨ 主要功能
 
 ### 🎨 核心功能
@@ -154,6 +163,27 @@ python app.py
 cd src/frontend
 # 编译运行 (在微信开发者工具中操作)
 ```
+
+#### 4. 飞书 H5 本地开发
+
+```bash
+cd src/feishu-web
+npm ci
+cp .env.example .env.local
+npm run dev
+```
+
+本地浏览器体验登录必须在后端显式配置 `FEISHU_DEV_LOGIN_ENABLED=True`，生产环境必须保持关闭。飞书客户端内使用时，还需要配置 `VITE_FEISHU_APP_ID`、服务端飞书凭据及开发者后台安全域名。
+
+#### 5. 同源容器构建
+
+仓库根目录的 `Dockerfile` 会先构建飞书 H5，再将静态产物与 Flask API 打入同一个镜像：
+
+```bash
+docker build --build-arg VITE_FEISHU_APP_ID=cli_xxx -t zhida-platform .
+```
+
+本机没有 Docker 时，可分别运行后端测试和 `npm run build`，但不能据此声称镜像构建已通过。
 
 ### ⚙️ 配置说明
 

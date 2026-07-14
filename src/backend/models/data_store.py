@@ -1,115 +1,176 @@
-# models/data_store.py - 数据存储模型（简化版，使用文件存储）
+# models/data_store.py - SQLite 结构化存储适配器
 
 import json
 import os
-from datetime import datetime
+import sqlite3
+import threading
+import uuid
+from datetime import datetime, timezone
 
 from config import Config
 
+COLLECTIONS = {
+    "users",
+    "results",
+    "recommendations",
+    "favorites",
+    "wardrobe_items",
+    "user_profiles",
+    "feedback",
+}
+
 
 class DataStore:
-    """简单的文件数据存储"""
+    """SQLite 数据存储。JSON payload 保留前端字段的向后兼容性。"""
 
-    def __init__(self, data_dir=None):
-        self.data_dir = data_dir or Config.DATA_DIR
-        if not os.path.exists(self.data_dir):
-            os.makedirs(self.data_dir)
+    def __init__(self, data_dir=None, database_url=None):
+        if data_dir:
+            os.makedirs(data_dir, exist_ok=True)
+            self.path = os.path.join(data_dir, "fashion_ai.db")
+        else:
+            url = database_url or Config.DATABASE_URL
+            if not url.startswith("sqlite:///"):
+                raise ValueError("当前仅支持 sqlite:/// DATABASE_URL")
+            self.path = url[len("sqlite:///") :]
+            os.makedirs(os.path.dirname(os.path.abspath(self.path)), exist_ok=True)
+        self._lock = threading.RLock()
+        self._initialize()
 
-    def _get_file_path(self, collection: str) -> str:
-        """获取集合文件路径"""
-        return os.path.join(self.data_dir, f"{collection}.json")
+    def _connection(self):
+        connection = sqlite3.connect(self.path, timeout=10)
+        connection.row_factory = sqlite3.Row
+        return connection
 
-    def _load_collection(self, collection: str) -> list:
-        """加载集合数据"""
-        file_path = self._get_file_path(collection)
-        if os.path.exists(file_path):
-            try:
-                with open(file_path, "r", encoding="utf-8") as f:
-                    return json.load(f)
-            except (json.JSONDecodeError, OSError):
-                return []
-        return []
+    def _initialize(self):
+        with self._connection() as connection:
+            for collection in COLLECTIONS:
+                connection.execute(f"""CREATE TABLE IF NOT EXISTS {collection} (
+                        id TEXT PRIMARY KEY,
+                        owner_user_id TEXT,
+                        payload TEXT NOT NULL,
+                        created_at TEXT NOT NULL,
+                        updated_at TEXT NOT NULL
+                    )""")
+                connection.execute(
+                    f"CREATE INDEX IF NOT EXISTS idx_{collection}_owner "
+                    f"ON {collection}(owner_user_id, created_at DESC)"
+                )
 
-    def _save_collection(self, collection: str, data: list):
-        """保存集合数据"""
-        file_path = self._get_file_path(collection)
-        with open(file_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
+    def _collection(self, collection):
+        if collection not in COLLECTIONS:
+            raise ValueError(f"未支持的数据集: {collection}")
+        return collection
+
+    @staticmethod
+    def _decode(row):
+        if not row:
+            return None
+        payload = json.loads(row["payload"])
+        payload.update(
+            id=row["id"],
+            owner_user_id=row["owner_user_id"],
+            created_at=row["created_at"],
+            updated_at=row["updated_at"],
+        )
+        return payload
 
     def insert(self, collection: str, document: dict) -> str:
         """插入文档"""
-        data = self._load_collection(collection)
-        if not document.get("id"):
-            document["id"] = str(int(datetime.now().timestamp() * 1000))
-        document["created_at"] = datetime.now().isoformat()
-        document["updated_at"] = datetime.now().isoformat()
-        data.append(document)
-        self._save_collection(collection, data)
-        return document.get("id")
+        collection = self._collection(collection)
+        document = dict(document)
+        record_id = document.pop("id", None) or uuid.uuid4().hex
+        owner = document.pop("owner_user_id", None)
+        now = datetime.now(timezone.utc).isoformat()
+        document.pop("created_at", None)
+        document.pop("updated_at", None)
+        with self._lock, self._connection() as connection:
+            connection.execute(
+                f"INSERT INTO {collection} (id, owner_user_id, payload, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
+                (record_id, owner, json.dumps(document, ensure_ascii=False), now, now),
+            )
+        return record_id
 
     def find_one(self, collection: str, query: dict) -> dict:
         """查找单个文档"""
-        data = self._load_collection(collection)
-        for doc in data:
-            match = True
-            for key, value in query.items():
-                if doc.get(key) != value:
-                    match = False
-                    break
-            if match:
-                return doc
-        return None
+        rows = self.find_many(collection, query=query, limit=1)
+        return rows[0] if rows else None
 
-    def find_many(self, collection: str, query: dict = None, limit: int = 10) -> list:
+    def find_many(
+        self, collection: str, query: dict = None, limit: int = 10, offset: int = 0
+    ) -> list:
         """查找多个文档"""
-        data = self._load_collection(collection)
-        if not query:
-            return list(reversed(data))[:limit]
-
-        results = []
-        for doc in data:
-            match = True
-            for key, value in query.items():
-                if doc.get(key) != value:
-                    match = False
-                    break
-            if match:
-                results.append(doc)
-                if len(results) >= limit:
-                    break
-        return results
+        collection = self._collection(collection)
+        query = query or {}
+        clauses, params = [], []
+        for key in ("id", "owner_user_id"):
+            if key in query:
+                clauses.append(f"{key} = ?")
+                params.append(query[key])
+        sql = f"SELECT * FROM {collection}"
+        if clauses:
+            sql += " WHERE " + " AND ".join(clauses)
+        supported = {"id", "owner_user_id"}
+        has_payload_filter = any(key not in supported for key in query)
+        sql += " ORDER BY created_at DESC"
+        if not has_payload_filter:
+            sql += " LIMIT ? OFFSET ?"
+            params.extend([max(1, min(int(limit), 100)), max(0, int(offset))])
+        with self._connection() as connection:
+            candidates = [self._decode(row) for row in connection.execute(sql, params)]
+        matches = [
+            doc for doc in candidates if all(doc.get(k) == v for k, v in query.items())
+        ]
+        if has_payload_filter:
+            return matches[
+                max(0, int(offset)) : max(0, int(offset)) + max(1, min(int(limit), 100))
+            ]
+        return matches
 
     def update_one(self, collection: str, query: dict, update: dict) -> bool:
         """更新单个文档"""
-        data = self._load_collection(collection)
-        for i, doc in enumerate(data):
-            match = True
-            for key, value in query.items():
-                if doc.get(key) != value:
-                    match = False
-                    break
-            if match:
-                doc.update(update)
-                doc["updated_at"] = datetime.now().isoformat()
-                data[i] = doc
-                self._save_collection(collection, data)
-                return True
-        return False
+        collection = self._collection(collection)
+        existing = self.find_one(collection, query)
+        if not existing:
+            return False
+        existing.update(update)
+        record_id = existing.pop("id")
+        owner = existing.pop("owner_user_id", None)
+        existing.pop("created_at", None)
+        existing.pop("updated_at", None)
+        now = datetime.now(timezone.utc).isoformat()
+        with self._lock, self._connection() as connection:
+            connection.execute(
+                f"UPDATE {collection} SET owner_user_id=?, payload=?, updated_at=? WHERE id=?",
+                (owner, json.dumps(existing, ensure_ascii=False), now, record_id),
+            )
+        return True
 
     def delete_one(self, collection: str, query: dict) -> bool:
         """删除单个文档"""
-        data = self._load_collection(collection)
-        for i, doc in enumerate(data):
-            match = True
-            for key, value in query.items():
-                if doc.get(key) != value:
-                    match = False
-                    break
-            if match:
-                data.pop(i)
-                self._save_collection(collection, data)
-                return True
-        return False
+        collection = self._collection(collection)
+        existing = self.find_one(collection, query)
+        if not existing:
+            return False
+        with self._lock, self._connection() as connection:
+            connection.execute(
+                f"DELETE FROM {collection} WHERE id=?", (existing["id"],)
+            )
+        return True
+
+    def ping(self):
+        with self._connection() as connection:
+            return connection.execute("SELECT 1").fetchone()[0] == 1
+
+    def scan(self, collection: str) -> list:
+        """后台维护任务使用的全量扫描；在线列表接口仍必须分页。"""
+        collection = self._collection(collection)
+        with self._connection() as connection:
+            return [
+                self._decode(row)
+                for row in connection.execute(
+                    f"SELECT * FROM {collection} ORDER BY created_at ASC"
+                )
+            ]
 
 
 # 全局数据存储实例

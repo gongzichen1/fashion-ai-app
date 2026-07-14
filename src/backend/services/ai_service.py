@@ -11,6 +11,10 @@ from config.settings import Config
 logger = logging.getLogger(__name__)
 
 
+class AIServiceError(RuntimeError):
+    """可对外识别的 AI 服务错误。"""
+
+
 class AIService:
     """AI服务类 - 封装OpenAI兼容大模型调用"""
 
@@ -23,7 +27,7 @@ class AIService:
         if self.api_url and self.api_key and self.model:
             logger.info("AI服务已配置OpenAI兼容接口，模型: %s", self.model)
         else:
-            logger.warning("AI_API_URL/AI_API_KEY/AI_MODEL 未完整配置，将使用默认兜底结果")
+            logger.warning("AI_API_URL/AI_API_KEY/AI_MODEL 未完整配置")
 
     @staticmethod
     def _normalize_chat_url(api_url: str) -> str:
@@ -97,7 +101,9 @@ class AIService:
         """
         preference_text = ""
         if not self._configured():
-            return self._get_default_analysis()
+            if Config.AI_DEMO_MODE:
+                return self._get_default_analysis()
+            raise AIServiceError("AI_SERVICE_NOT_CONFIGURED")
 
         if style_preference:
             preference_text = f"""
@@ -143,12 +149,9 @@ class AIService:
             result = self._extract_json(result_text)
             return result
 
-        except json.JSONDecodeError as e:
-            logger.warning("AI分析JSON解析失败: %s", e)
-            return self._get_default_analysis()
         except Exception as e:
             logger.exception("AI分析失败: %s", e)
-            return self._get_default_analysis()
+            raise AIServiceError("AI_ANALYSIS_FAILED") from e
 
     def generate_recommendations(
         self, analysis_result: dict, user_preference: dict = None
@@ -165,7 +168,9 @@ class AIService:
         """
         preference_text = ""
         if not self._configured():
-            return self._get_default_recommendations(analysis_result)
+            if Config.AI_DEMO_MODE:
+                return self._get_default_recommendations(analysis_result)
+            raise AIServiceError("AI_SERVICE_NOT_CONFIGURED")
 
         if user_preference:
             preference_text = f"""
@@ -221,7 +226,7 @@ class AIService:
 
         except Exception as e:
             logger.exception("推荐生成失败: %s", e)
-            return self._get_default_recommendations(analysis_result)
+            raise AIServiceError("AI_RECOMMENDATION_FAILED") from e
 
     def _get_default_analysis(self) -> dict:
         """返回默认的分析结果"""

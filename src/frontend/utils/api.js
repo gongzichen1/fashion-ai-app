@@ -4,7 +4,8 @@ const app = getApp();
 /**
  * 封装请求方法
  */
-const request = (options) => {
+const request = async (options) => {
+  await app.ensureBackendLogin();
   return new Promise((resolve, reject) => {
     wx.request({
       url: `${app.globalData.apiBaseUrl}${options.url}`,
@@ -12,6 +13,7 @@ const request = (options) => {
       data: options.data || {},
       header: {
         'Content-Type': 'application/json',
+        ...app.requestHeaders(),
         ...options.header
       },
       success: (res) => {
@@ -35,12 +37,14 @@ const request = (options) => {
 /**
  * 上传图片
  */
-const uploadImage = (filePath) => {
+const uploadImage = async (filePath) => {
+  await app.ensureBackendLogin();
   return new Promise((resolve, reject) => {
     wx.uploadFile({
       url: `${app.globalData.apiBaseUrl}/analyze`,
       filePath: filePath,
       name: 'image',
+      header: app.requestHeaders(),
       success: (res) => {
         try {
           const data = JSON.parse(res.data);

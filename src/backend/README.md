@@ -1,103 +1,41 @@
-# 后端服务说明
+# 智搭统一后端
 
-## 环境要求
+Flask API 同时服务微信小程序与飞书 H5。生产接口默认要求登录，所有业务数据按当前用户隔离；AI 未配置或调用失败时返回明确错误，不会静默生成演示结果。
 
-- Python 3.10+
-- pip
+## 本地启动
 
-## 安装步骤
-
-### 1. 创建虚拟环境
+从项目根目录执行：
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate  # macOS/Linux
-# 或
-venv\Scripts\activate     # Windows
+python3.11 -m venv .venv
+.venv/bin/pip install -r src/backend/requirements.txt
+cp src/backend/.env.example src/backend/.env
+.venv/bin/python src/backend/app.py
 ```
 
-### 2. 安装依赖
+至少配置 `SECRET_KEY`、AI provider 参数。飞书环境配置 `FEISHU_APP_ID`、`FEISHU_APP_SECRET`；微信环境配置 `WECHAT_APP_ID`、`WECHAT_APP_SECRET`。开发登录必须显式设置 `ALLOW_DEV_LOGIN=true`，生产禁止开启。
+
+## 数据与图片
+
+- 默认 `DATABASE_URL=sqlite:///...` 只适合本地或单实例 MVP，生产多实例必须替换为外部正式数据库。
+- `STORAGE_BACKEND=local` 使用本地目录；设为 `cos` 时必须配置 `COS_SECRET_ID`、`COS_SECRET_KEY`、`COS_REGION`、`COS_BUCKET`。
+- 原始图片默认记录 30 天到期时间；定时执行 `FLASK_APP=src.backend.app flask cleanup-expired-images` 清理未被收藏或衣橱引用的对象。
+
+## 核心接口
+
+- `GET /api/health`：数据库、对象存储、AI 和飞书配置分项状态。
+- `POST /api/auth/feishu/login`、`POST /api/auth/wechat/login`：建立同源会话。
+- `GET /api/me`、`POST /api/auth/logout`：当前用户与登出。
+- `POST /api/analyze`：鉴权图片分析，返回 `requestId` 和明确状态。
+- `/api/history`、`/api/result/<id>`、`/api/favorites`、`/api/wardrobe`、`/api/preferences`、`/api/feedback`：用户隔离资源接口。
+
+## 验证
 
 ```bash
-pip install -r requirements.txt
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 .venv/bin/python -m pytest -q
+.venv/bin/python -m black --check src/backend tests
+.venv/bin/python -m isort --check-only src/backend tests
+.venv/bin/python -m flake8 src/backend tests --exclude=src/backend/venv --select=E9,F63,F7,F82
 ```
 
-### 3. 配置环境变量
-
-复制 `.env.example` 为 `.env` 并填入配置：
-
-```bash
-cp .env.example .env
-```
-
-必填配置：
-- `AI_API_URL`: OpenAI 兼容接口地址。可以填 base url，服务会自动追加 `/chat/completions`。
-- `AI_API_KEY`: 大模型 API 密钥。
-- `AI_MODEL`: 模型名称。
-
-未配置时接口仍可运行，但会返回演示兜底分析结果。
-
-### 4. 启动服务
-
-```bash
-python app.py
-```
-
-服务默认运行在 http://localhost:5001
-
-## API接口
-
-### GET /api/health
-健康检查
-
-### POST /api/analyze
-分析服装图片，返回搭配推荐
-
-请求方式：
-- 文件上传：`multipart/form-data`，字段名为 `image`
-- Base64上传：`application/json`，字段名为 `image_base64`
-
-### POST /api/recommend
-根据分析结果生成推荐
-
-### GET /api/weather
-根据 `latitude` 和 `longitude` 获取当前天气和穿搭建议
-
-### GET /api/result/<id>
-获取历史分析结果
-
-### GET /api/history
-获取历史记录列表
-
-## 目录结构
-
-```
-backend/
-├── api/                 # API路由
-│   └── routes.py        # 路由定义
-├── services/            # 业务服务
-│   ├── ai_service.py    # AI服务
-│   └── image_service.py # 图片处理
-├── models/              # 数据模型
-├── config/              # 配置
-├── uploads/             # 上传文件存储
-├── static/              # 静态资源
-├── app.py               # 应用入口
-└── requirements.txt     # 依赖列表
-```
-
-## 开发说明
-
-### 添加新的API接口
-
-1. 在 `api/routes.py` 中添加路由函数
-2. 使用 `@api_bp.route()` 装饰器定义路由
-3. 返回 JSON 格式响应
-
-### 修改AI提示词
-
-编辑 `services/ai_service.py` 中的 `prompt` 变量
-
-### 调整图片处理
-
-编辑 `services/image_service.py`
+完整产品状态、缺陷与飞书发布门槛见项目根目录 `docs/`。

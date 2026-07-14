@@ -2,54 +2,33 @@
 
 ## Active Task
 
-- 将 `/Users/gongzichen/Desktop/穿搭ai项目/Chinese Fashion App` 中的新 UI 视觉方案迁移到微信小程序前端，替换原有 UI，同时保留现有业务逻辑。
+- 阶段 0 本地代码与报告已完成；下一步是在 CloudBase 与飞书管理后台完成真实环境配置和发布验收。
 
 ## Success Criteria
 
-- 小程序页面注册、点击处理、图片资源、导航目标、权限声明无明显阻断问题。
-- 首页、拍照页、结果页、个人中心和个人中心子页面视觉风格与新 UI 原型一致，采用暖白背景、柔粉主色、圆角卡片和更清晰的功能入口。
-- 已有 AI 分析、天气、历史、收藏、衣橱、偏好、身材、反馈、关于等功能入口不被 UI 替换破坏。
-- 后端主要接口可在隔离依赖环境中通过冒烟测试。
-- 前端 JS 与后端 Python 语法检查通过。
-- 发现的上线风险已修复或明确列为需要人工/平台确认的项。
+- 飞书移动/桌面免登、媒体选择、真实 AI 分析、历史/收藏/衣橱与偏好同步均通过。
+- 两个飞书账号互不可见数据；删除与 30 天清理同时覆盖数据库和对象存储。
+- 容器重启、多实例和换设备后数据保持一致；微信核心流程不回归。
+- AI、非法图片和网络失败均返回真实可追踪错误，不生成假结果。
 
 ## Plan
 
-- 对照 React/Vite 原型提取视觉语言和页面结构。
-- 替换小程序全局主题、首页、拍照页、结果页、个人中心和子页面 WXML/WXSS。
-- 仅在必要处调整页面展示数据，不改后端接口与核心业务逻辑。
-- 跑前端语法检查、页面注册/点击处理/图片资源静态检查。
+- 创建飞书自建网页应用，配置主页、权限、可信域名和可用范围。
+- 接入外部关系型数据库与真实私有 COS，并配置平台定时清理。
+- 部署根目录镜像，验证 health、飞书 JSSDK、AI 与双账号隔离。
+- 进行 5–20 人内部试运行，达到核心链路 95% 后再扩大范围。
 
 ## Completed
 
-- `2026-06-03` 已将 `Chinese Fashion App` 的暖白/柔粉新 UI 视觉迁移到微信小程序：覆盖首页、拍照页、结果页、个人中心、风格偏好、体型档案、反馈建议、关于智搭。
-- `2026-06-03` 已保留现有业务逻辑并只做必要展示数据补充：结果页新增 `displayColor`、`scenesText` 展示字段；个人中心菜单文案和衣橱推荐图 fallback 优化。
-- `2026-06-03` 验证通过：前端 JS 语法检查、页面注册/TabBar/点击绑定/图片资源静态检查、WXML 主要容器闭合数量检查。
-- `2026-06-03` 已通过微信开发者工具 CLI 生成真机预览二维码：`outputs/wechat-preview/preview-20260603.png`；包体总大小 `100275` Byte，约 `97.9 KB`。
-- `2026-06-03` 根据真机预览反馈继续修正 UI：新增自定义底部导航 `custom-tab-bar`，实现首页/拍照/我的与中间悬浮相机按钮；首页功能入口改为粉/橙/绿/紫符号图标，最近分析补风格标签。
-- `2026-06-03` 已重新生成修正版真机预览二维码：`outputs/wechat-preview/preview-20260603-ui-fix.png`；包体总大小 `104879` Byte，约 `102.4 KB`。
-- 已创建并读取 agent_memory 三个文件。
-- 已确认 result/<id> 后端接口未实现，且前端历史只保存摘要。
-- 已修复个人页头像/统计项/收藏/衣橱/空状态入口点击行为。
-- 已修复分析成功后的完整结果本地保存、历史详情本地加载、图片地址归一化和结果页返回首页。
-- 已补后端分析结果存储、详情读取接口，以及无扩展名上传图片的 MIME 类型识别。
-- 已通过前端 JS 语法检查和后端 Python 语法编译。
-- 已新增首页天气卡片、点击定位获取天气、`app.json` 定位权限说明和后端 `/api/weather` 接口。
-- 已通过本轮首页 JS 语法检查和后端 routes.py 语法编译。
-- 已补齐风格偏好、身材信息、意见反馈、关于我们四个个人页菜单目标页面。
-- 已增加前端 API 配置文件，便于发布前替换线上 HTTPS 后端域名。
-- 已完成系统性自动检查：页面文件、点击处理、图片资源、导航注册、前端 JS、后端编译、后端导入测试、后端接口冒烟测试、Open-Meteo 实时连通性。
-- 已完成全面代码排查后续修复：结果页保存图片真实可用、商品链接去除占位小程序跳转、后端数据目录固定、上传/天气/推荐接口加固、日志替换 print、文档与启动脚本更新。
-- 已新增 `tests/test_api_smoke.py` 固化天气、分析、结果、历史接口冒烟测试。
-- `2026-06-01` 上线前复验：删除首页未使用且缺失资源的 `banner1/2/3.png` 数据引用；用 `isort`/`black` 统一后端和测试格式；补装本地 venv 中缺失的 `black`、`flake8`、`isort` 检查工具。
-- `2026-06-01` 验证通过：前端 JS 语法检查、页面注册/TabBar/静态图片检查、后端 Python 编译、`pytest -q` 7 项、后端接口冒烟、`black --check`、`isort --check-only`、`flake8 --select=E9,F63,F7,F82`。
-- 已产出上线前剩余清单：`/Users/gongzichen/Documents/Codex/2026-06-01/1-2-3/outputs/zhida_launch_checklist_2026-06-01.md`。
-- `2026-06-01` 已新增 CloudBase 云托管部署文件：`src/backend/Dockerfile`、`src/backend/.dockerignore`；并打包后端上传包到 `/Users/gongzichen/Documents/Codex/2026-06-01/1-2-3/outputs/zhida-backend-cloudbase.zip`。
-- `2026-06-02` 已确认 CloudBase 后端 `/` 与 `/api/health` 返回 200；已将前端 API 地址切换为 `https://zhida-api-264856-5-1259394189.sh.run.tcloudbase.com/api`；前端 JS 语法检查通过。
-- `2026-06-02` 已将后端 AI 调用统一为 OpenAI 兼容接口：支持视觉图片分析和文本推荐；新增 `AI_API_URL`、`AI_API_KEY`、`AI_MODEL`、`AI_TIMEOUT` 配置；已更新 `.env.example`、后端 README、根 README、运行指南和启动脚本提示。
-- `2026-06-02` 已彻底移除旧模型配置和旧 SDK 生产依赖，项目口径统一为 `https://agione.cc/hyperone/xapi/api` + `minimax/minimax-m2.7/b1d92`。
-- `2026-06-02` 已重新生成 CloudBase 上传包：`/Users/gongzichen/Documents/Codex/2026-06-01/1-2-3/outputs/zhida-backend-cloudbase.zip`。验证通过：`pytest -q` 7 项、后端编译、`black/isort/flake8`、前端 JS。
+- 建立基线提交 `3523c38`，保留既有微信 UI 改动。
+- 原 ZIP 移入忽略的 `archive/source-assets/`；旧 React 原型和微信预览产物移入 `archive/`。
+- 完成 `docs/PROJECT_OVERVIEW.md`、`FUNCTION_STATUS.md`、`DEFECTS.md`、`GITHUB_CASES.md`、`FEISHU_ROADMAP.md`。
+- 完成飞书 React/Vite 移动优先 H5：首页、媒体上传、结果、历史、收藏、衣橱、偏好和个人中心。
+- 完成统一后端认证、用户隔离资源 API、明确 AI 错误、分项 health、local/COS 存储和生命周期清理。
+- 微信小程序已接入后端微信登录与会话 Cookie，保留原核心流程。
+- Python 3.12 干净 `.venv` 下 18 项测试通过；Black、isort、flake8 关键错误检查、compileall、微信 JS 语法和 H5 生产构建通过。
+- 旧 CloudBase `/` 与 `/api/health` 已恢复快速 200；旧 `/api/analyze` 实测仍返回固定粉色裙子假结果，证明必须重新部署。
 
 ## Next Step
 
-- 用微信扫描 `outputs/wechat-preview/preview-20260603-ui-fix.png` 做手机端验收，重点确认自定义底部导航、首页四个功能图标、相机取景框、相册上传、AI 分析跳转、定位授权和个人页入口表现。
+- 准备飞书 App ID/Secret、外部数据库连接和 COS 私有桶配置，部署本轮镜像并按 `docs/FEISHU_ROADMAP.md` 执行双账号/双端验收。
