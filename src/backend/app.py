@@ -20,6 +20,40 @@ from services.object_storage import create_object_storage
 from config import Config, config
 
 
+def production_config_errors(settings, database_backend):
+    """返回会让生产部署退化为本地演示形态的配置问题。"""
+    errors = []
+    secret = settings.get("SECRET_KEY", "")
+    if len(secret) < 32 or secret.startswith("replace-"):
+        errors.append("SECRET_KEY 必须是至少 32 字符的随机值")
+    if database_backend == "sqlite":
+        errors.append("生产环境禁止使用 SQLite，请配置托管 MySQL/PostgreSQL")
+    if settings.get("STORAGE_BACKEND", "local").lower() != "cos":
+        errors.append("生产环境必须使用私有 COS")
+    for name in (
+        "COS_SECRET_ID",
+        "COS_SECRET_KEY",
+        "COS_REGION",
+        "COS_BUCKET",
+        "FEISHU_APP_ID",
+        "FEISHU_APP_SECRET",
+        "FEISHU_WEB_ORIGINS",
+        "AI_API_URL",
+        "AI_API_KEY",
+        "AI_MODEL",
+    ):
+        if not settings.get(name):
+            errors.append(f"缺少生产配置 {name}")
+    if settings.get("FEISHU_DEV_LOGIN_ENABLED"):
+        errors.append("生产环境禁止开启 FEISHU_DEV_LOGIN_ENABLED")
+    if settings.get("AI_DEMO_MODE"):
+        errors.append("生产环境禁止开启 AI_DEMO_MODE")
+    origins = settings.get("CORS_ORIGINS", "")
+    if not origins or "*" in {item.strip() for item in origins.split(",")}:
+        errors.append("生产环境 CORS_ORIGINS 必须是明确白名单")
+    return errors
+
+
 def create_app(config_name="default"):
     """
     创建Flask应用实例
@@ -39,6 +73,10 @@ def create_app(config_name="default"):
         if config_name == "production":
             raise RuntimeError("生产环境必须配置 SECRET_KEY")
         app.config["SECRET_KEY"] = secrets.token_hex(32)
+    if config_name == "production":
+        errors = production_config_errors(app.config, db.backend)
+        if errors:
+            raise RuntimeError("生产配置校验失败: " + "; ".join(errors))
 
     # 启用CORS
     CORS(

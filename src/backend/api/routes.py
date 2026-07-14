@@ -140,10 +140,18 @@ def feishu_login():
 
 @api_bp.post("/auth/feishu/challenge")
 def feishu_login_challenge():
+    app_id = current_app.config.get("FEISHU_APP_ID", "")
+    if not app_id:
+        return _error("飞书应用尚未配置", 503, "FEISHU_NOT_CONFIGURED")
     state = secrets.token_urlsafe(32)
     session["feishu_login_state"] = state
     session["feishu_login_state_expires_at"] = int(time.time()) + 300
-    return jsonify({"success": True, "data": {"state": state, "expiresIn": 300}})
+    return jsonify(
+        {
+            "success": True,
+            "data": {"state": state, "expiresIn": 300, "appId": app_id},
+        }
+    )
 
 
 @api_bp.post("/auth/dev-login")
@@ -246,11 +254,11 @@ def health_check():
             )
         },
         "feishu": {"status": "ok" if _auth_service().configured else "unconfigured"},
-        "wechat": {
-            "status": "ok" if _wechat_auth_service().configured else "unconfigured"
-        },
+        "wechat": {"status": "ok" if _wechat_auth_service().configured else "disabled"},
     }
-    ready = all(item["status"] in {"ok", "demo"} for item in components.values())
+    ready = all(
+        item["status"] in {"ok", "demo", "disabled"} for item in components.values()
+    )
     return jsonify(
         {
             "success": True,

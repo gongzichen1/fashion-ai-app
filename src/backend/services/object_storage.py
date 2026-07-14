@@ -53,24 +53,34 @@ class CosObjectStorage:
     backend = "cos"
 
     def __init__(
-        self, secret_id, secret_key, region, bucket, token="", public_prefix="/uploads"
+        self,
+        secret_id,
+        secret_key,
+        region,
+        bucket,
+        token="",
+        public_prefix="/uploads",
+        client=None,
     ):
-        if not all((secret_id, secret_key, region, bucket)):
+        if client is None and not all((secret_id, secret_key, region, bucket)):
             raise RuntimeError(
                 "COS 存储缺少 COS_SECRET_ID/COS_SECRET_KEY/COS_REGION/COS_BUCKET"
             )
-        from qcloud_cos import CosConfig, CosS3Client
-
         self.bucket = bucket
         self.public_prefix = public_prefix.rstrip("/")
-        config = CosConfig(
-            Region=region,
-            SecretId=secret_id,
-            SecretKey=secret_key,
-            Token=token or None,
-            Scheme="https",
-        )
-        self.client = CosS3Client(config)
+        if client is not None:
+            self.client = client
+        else:
+            from qcloud_cos import CosConfig, CosS3Client
+
+            config = CosConfig(
+                Region=region,
+                SecretId=secret_id,
+                SecretKey=secret_key,
+                Token=token or None,
+                Scheme="https",
+            )
+            self.client = CosS3Client(config)
 
     def upload(self, local_path, key):
         self.client.upload_file(Bucket=self.bucket, LocalFilePath=local_path, Key=key)

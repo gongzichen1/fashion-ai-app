@@ -173,14 +173,14 @@ cp .env.example .env.local
 npm run dev
 ```
 
-本地浏览器体验登录必须在后端显式配置 `FEISHU_DEV_LOGIN_ENABLED=True`，生产环境必须保持关闭。飞书客户端内使用时，还需要配置 `VITE_FEISHU_APP_ID`、服务端飞书凭据及开发者后台安全域名。
+本地浏览器体验登录必须在后端显式配置 `FEISHU_DEV_LOGIN_ENABLED=True`，生产环境必须保持关闭。飞书客户端内使用时，后端必须配置 `FEISHU_APP_ID`、`FEISHU_APP_SECRET`、`FEISHU_WEB_ORIGINS`；公开 App ID 会由登录 challenge 在运行时返回，无需写入前端构建。
 
 #### 5. 同源容器构建
 
 仓库根目录的 `Dockerfile` 会先构建飞书 H5，再将静态产物与 Flask API 打入同一个镜像：
 
 ```bash
-docker build --build-arg VITE_FEISHU_APP_ID=cli_xxx -t zhida-platform .
+docker build -t zhida-platform .
 ```
 
 本机没有 Docker 时，可分别运行后端测试和 `npm run build`，但不能据此声称镜像构建已通过。

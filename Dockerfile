@@ -5,8 +5,6 @@ COPY src/feishu-web/package.json src/feishu-web/package-lock.json ./
 RUN npm ci
 COPY src/feishu-web/ ./
 
-ARG VITE_FEISHU_APP_ID
-ENV VITE_FEISHU_APP_ID=${VITE_FEISHU_APP_ID}
 RUN npm run build
 
 FROM python:3.11-slim

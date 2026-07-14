@@ -247,6 +247,7 @@ def test_feishu_login_reuses_identity_and_sets_protected_session(tmp_path, monke
     monkeypatch.setattr(routes, "db", store)
     monkeypatch.setattr(routes, "_auth_service", lambda: FakeFeishuAuth())
     app = create_app("testing")
+    app.config["FEISHU_APP_ID"] = "cli_test"
     client = app.test_client()
 
     first_state = client.post("/api/auth/feishu/challenge").get_json()["data"]["state"]
@@ -270,6 +271,14 @@ def test_feishu_login_reuses_identity_and_sets_protected_session(tmp_path, monke
     )
     assert replay.status_code == 400
     assert replay.get_json()["error"]["code"] == "AUTH_STATE_INVALID"
+
+
+def test_feishu_challenge_requires_runtime_app_configuration():
+    app = create_app("testing")
+    app.config["FEISHU_APP_ID"] = ""
+    response = app.test_client().post("/api/auth/feishu/challenge")
+    assert response.status_code == 503
+    assert response.get_json()["error"]["code"] == "FEISHU_NOT_CONFIGURED"
 
 
 def test_feishu_login_rejects_missing_state_before_provider_call(tmp_path, monkeypatch):

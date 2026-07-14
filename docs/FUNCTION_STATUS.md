@@ -30,7 +30,7 @@
 
 | 功能 | 状态 | 证据与限制 |
 | --- | --- | --- |
-| `GET /api/health` | 部分可用 | 本轮已增加数据库、存储、AI、飞书分项和 degraded 状态；尚未区分独立 liveness/readiness，SQLite/本地存储健康不代表生产持久化 |
+| `GET /api/health` | 部分可用 | 已增加数据库、存储、AI、飞书、微信分项和 ready 状态；生产启动会拒绝 SQLite、本地存储、demo/dev 登录和宽泛 CORS；尚未拆分独立 liveness/readiness |
 | `POST /api/analyze` | 可用（本地自动测试范围） | 已强制会话、绑定 owner、返回 requestId 和错误码；支持常见图片格式；真实飞书/AI/对象存储待验收 |
 | `POST /api/recommend` | 部分可用 | 已强制会话并对 AI 错误返回 503；场景筛选存在，真实模型待验收 |
 | `GET /api/weather` | 可用（单元冒烟范围） | 参数范围和伪外部响应已有测试；真实外网仍是运行依赖 |
@@ -73,7 +73,7 @@
 - 无文件扩展名但图片头合法的 PNG 上传可被接受。
 - 鉴权资源在退出后返回 401，两个开发账号的收藏数据互不可见且不能互删；
 - AI 失败返回 503、明确错误码和 requestId，不生成固定成功；
-- 后端共 24 项测试在 Python 3.12 干净 `.venv` 通过，覆盖飞书 OAuth v2、一次性 state、动态 ticket 缓存、来源限制、重复身份复用、数据库 URL、旧用户迁移、用户隔离、图片权限和生命周期；飞书 H5 有 2 项 `ttfile` 转换测试通过，TypeScript/Vite 生产构建通过。
+- 本地后端 28 项通过、2 项真实 MySQL/PostgreSQL 集成测试因无本地服务跳过；飞书 H5 有 2 项 `ttfile` 转换测试通过，TypeScript/Vite 生产构建通过。GitHub Actions 已配置 PostgreSQL 16、MySQL 8.4、Docker 构建和部署后验证，需推送后取得远端运行证据。
 
 当前测试不能证明的范围：
 

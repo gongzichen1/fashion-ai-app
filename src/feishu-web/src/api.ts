@@ -38,7 +38,7 @@ function listOf<T>(payload: T[] | { items?: T[]; results?: T[] }): T[] {
 
 export const api = {
   me: () => request<User>("/me"),
-  feishuChallenge: () => request<{ state: string; expiresIn: number }>("/auth/feishu/challenge", { method: "POST" }),
+  feishuChallenge: () => request<{ state: string; expiresIn: number; appId: string }>("/auth/feishu/challenge", { method: "POST" }),
   loginWithFeishu: (code: string, state: string) => request<User>("/auth/feishu/login", { method: "POST", body: JSON.stringify({ code, state }) }),
   devLogin: () => request<User>("/auth/dev-login", { method: "POST", body: JSON.stringify({ name: "本地体验用户" }) }),
   logout: () => request<void>("/auth/logout", { method: "POST" }),

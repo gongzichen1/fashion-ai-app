@@ -1,6 +1,5 @@
 import { api } from "./api";
 
-const appId = import.meta.env.VITE_FEISHU_APP_ID as string | undefined;
 let jsapiConfiguration: Promise<boolean> | null = null;
 
 function sdkReady(): Promise<void> {
@@ -17,19 +16,19 @@ export function isFeishu(): boolean {
 }
 
 export async function requestLoginCode(): Promise<{ code: string; state: string }> {
-  if (!appId) throw new Error("缺少 VITE_FEISHU_APP_ID，请先配置飞书应用 ID");
   await sdkReady();
   const tt = window.tt;
   if (!tt) throw new Error("请在飞书客户端内打开应用");
   const challenge = await api.feishuChallenge();
+  if (!challenge.appId) throw new Error("服务端缺少飞书应用 ID");
 
   return new Promise((resolve, reject) => {
     const callbacks = { success: (result: { code: string; state?: string }) => {
       if (result.state && result.state !== challenge.state) return reject(new Error("飞书登录状态校验失败"));
       resolve({ code: result.code, state: challenge.state });
     }, fail: (error: { errMsg?: string; errString?: string }) => reject(feishuError(error)) };
-    if (tt.requestAccess) tt.requestAccess({ appID: appId, scopeList: [], state: challenge.state, ...callbacks });
-    else if (tt.requestAuthCode) tt.requestAuthCode({ appId, ...callbacks });
+    if (tt.requestAccess) tt.requestAccess({ appID: challenge.appId, scopeList: [], state: challenge.state, ...callbacks });
+    else if (tt.requestAuthCode) tt.requestAuthCode({ appId: challenge.appId, ...callbacks });
     else reject(new Error("当前飞书版本不支持免登录，请升级客户端"));
   });
 }

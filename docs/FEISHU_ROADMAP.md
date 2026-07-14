@@ -7,7 +7,8 @@
 ## 0. 本轮完成状态
 
 - 已完成：`src/feishu-web` React/Vite H5、同源 API 客户端、免登/JSSDK/媒体/分享代码及浏览器降级；生产构建通过，依赖审计 0 个已知漏洞。
-- 已完成：Flask 飞书 OAuth v2、一次性登录 state、动态 tenant token/jsapi_ticket 缓存、H5 可信来源签名、微信 jscode2session、统一会话、用户隔离的 SQLite/MySQL/PostgreSQL 数据层、外部身份唯一索引、历史/收藏/衣橱/偏好/反馈 API、AI 错误透明化、requestId、分项 health、local/COS 存储 adapter 和图片到期清理 CLI；后端 24 项、飞书媒体 2 项测试通过。
+- 已完成：Flask 飞书 OAuth v2、一次性登录 state、动态 tenant token/jsapi_ticket 缓存、H5 可信来源签名、运行时 App ID、微信 jscode2session、统一会话、用户隔离的 SQLite/MySQL/PostgreSQL 数据层、生产配置硬校验、历史/收藏/衣橱/偏好/反馈 API、AI 错误透明化、local/COS 存储和图片清理；本地后端 28 项、飞书媒体 2 项通过，MySQL/PostgreSQL 与 Docker 已加入 CI 门槛。
+- 已移除原 GitHub Actions 中只输出“部署成功”的占位步骤；新的手动生产部署只有在验证、两种数据库和 Docker 构建全部通过后才调用 CloudBase CLI，并执行同源 H5、readiness、鉴权和 dev-login 关闭检查。
 - 尚未完成：真实飞书应用配置和管理员审核、双端真机、CloudBase 新版本部署、真实 AI 成功、托管数据库实例验收、真实私有 COS 验收及平台定时清理调度。
 - 当前线上仍是旧版本：HTTP 健康正常，但测试图返回固定粉色裙子；不能以线上 200 认定本轮修复已发布。
 

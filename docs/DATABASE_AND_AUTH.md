@@ -32,6 +32,7 @@ DATABASE_URL=<托管 MySQL 或 PostgreSQL 连接串>
 FEISHU_APP_ID=<飞书应用 ID>
 FEISHU_APP_SECRET=<飞书应用密钥>
 FEISHU_DEV_LOGIN_ENABLED=False
+FEISHU_WEB_ORIGINS=https://<同源业务域名>
 CORS_ORIGINS=https://<同源业务域名>
 ```
 
