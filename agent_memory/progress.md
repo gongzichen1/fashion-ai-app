@@ -29,7 +29,7 @@
 - Python 3.12 干净 `.venv` 下 33 项测试通过、2 项 MySQL/PostgreSQL 集成测试因本地无服务跳过；飞书 H5 的 `ttfile` 文件系统转换 2 项测试和生产构建通过。
 - 已用 `FileSystemManager.readFile` 替代对 `ttfile://` 的直接 fetch，并在媒体选择和分享前强制完成 JSSDK 鉴权。
 - 飞书 App ID 改为由后端 challenge 在运行时返回；同一镜像无需构建参数即可切换环境。
-- GitHub Actions 已替换假部署：第二次远端运行的后端/H5/安全审计、MySQL 8.4、PostgreSQL 16 和 Docker 同源镜像构建全部通过；手动 CloudBase 部署及部署后验证已就位。
+- GitHub Actions 已替换假部署：提交 `ad9ca23` 的 33 项后端/H5/安全审计、MySQL 8.4、PostgreSQL 16 和 Docker 同源镜像构建全部通过；手动 CloudBase 部署及部署后验证已就位。
 - COS readiness 已改为真实 `head_bucket` 检查；删除分析后保留的图片会在收藏/衣橱最后一个引用移除时同步删除。
 - 新增 `scripts/verify_two_account_isolation.py`，可分别用移动端和桌面端的两个真实会话自动验证列表、ID、图片、收藏、衣橱、删除与最后引用生命周期。
 - 旧 CloudBase `/` 与 `/api/health` 已恢复快速 200；旧 `/api/analyze` 实测仍返回固定粉色裙子假结果，证明必须重新部署。
